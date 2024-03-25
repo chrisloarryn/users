@@ -1,0 +1,103 @@
+{
+	"info": {
+		"_postman_id": "87fff8b6-3962-4634-845c-a75afe707f0c",
+		"name": "Users Management",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "8636249",
+		"_collection_link": "https://chrisloarryn-team.postman.co/workspace/SAWA-PEC~d00680c3-620b-4b3b-ac7b-70269d6f2e13/collection/8636249-87fff8b6-3962-4634-845c-a75afe707f0c?action=share&source=collection_link&creator=8636249"
+	},
+	"item": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Create User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Juan Rodriguez\",\n    \"email\": \"juan2@rodriguez.org\",\n    \"password\": \"hunter2\",\n    \"phones\": [\n        {\n            \"number\": \"1234567\",\n            \"citycode\": \"1\",\n            \"contrycode\": \"57\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/users",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/users/7b9b0499-9bb3-4e7f-8385-5e8b80fa3760",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"users",
+								"7b9b0499-9bb3-4e7f-8385-5e8b80fa3760"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/users",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/users/7f0f4a6a-87f9-4be9-853c-fe0d331908bc",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"users",
+								"7f0f4a6a-87f9-4be9-853c-fe0d331908bc"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

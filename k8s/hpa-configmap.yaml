@@ -1,0 +1,64 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cuenta-movimiento-backend
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: cuenta-movimiento-backend
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+---
+#apiVersion: v1
+#kind: ConfigMap
+#metadata:
+#  name: env-cuenta-movimiento-backend
+#  namespace: chrisloarryn-CONFIG_ENVIRONMENT
+#data:
+
+
+---
+# ingress controller
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: cuenta-movimiento-backend
+#   namespace: chrisloarryn-CONFIG_ENVIRONMENT
+#   annotations:
+#     kubernetes.io/ingress.class: "nginx"
+#     nginx.ingress.kubernetes.io/rewrite-target: /
+#     nginx.ingress.kubernetes.io/ssl-redirect: "false"
+#     nginx.ingress.kubernetes.io/enable-cors: "true"
+#     nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+#     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+#     nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS, DELETE"
+#     nginx.ingress.kubernetes.io/cors-allow-headers: "Authorization, Content-Type, Origin, X-Auth-Token"
+#     nginx.ingress.kubernetes.io/cors-max-age: "3600"
+#     kubernetes.io/ingress.allow-http: "false"
+    
+#     nginx.ingress.kubernetes.io/auth-tls-secret: chrisloarryn-CONFIG_ENVIRONMENT/cuenta-movimiento-backend-tls
+#     nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
+#     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+#     nginx.ingress.kubernetes.io/proxy-body-size: "0"
+#     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+# spec:
+#   rules:
+#     - host: movil-app-ms-backend-dev-ekrxay4khq-uc.a.run.app
+#       http:
+#         paths:
+#           - path: /api/v1
+#             pathType: Prefix
+#             backend:
+#               service:
+#                 name: cuenta-movimiento-backend
+#                 port:
+#                   number: 3000
