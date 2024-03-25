@@ -1,0 +1,60 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    commit-message:
+      # Prefix all commit messages with "[github-actions] " (no colon, but a trailing whitespace)
+      prefix: "[go-mod] "
+    labels:
+      - "gomod"
+      - "dependencies"
+    assignees:
+      - "chrisloarryn"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      # Prefix all commit messages with "[github-actions] " (no colon, but a trailing whitespace)
+      prefix: "[github-actions] "
+      include: scope
+    labels:
+      - "github-actions"
+      - "dependencies"
+    assignees:
+      - "chrisloarryn"
+
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      # Prefix all commit messages with "[github-actions] " (no colon, but a trailing whitespace)
+      prefix: "[docker] "
+      include: scope
+    labels:
+      - "docker"
+      - "dependencies"
+      - "java"
+    assignees:
+      - "chrisloarryn"
+
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    commit-message:
+      # Prefix all commit messages with "[github-actions] " (no colon, but a trailing whitespace)
+      prefix: "[maven] "
+      include: scope
+    labels:
+      - "maven"
+      - "dependencies"
+      - "java"
+      - "spring"
+      - "spring-boot"
+      - "spring-cloud"
+    assignees:
+      - "chrisloarryn"

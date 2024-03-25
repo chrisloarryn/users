@@ -1,0 +1,251 @@
+name: Build and Deploy to Cloud Run
+
+permissions: write-all
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      # - main
+      - develop
+      - main_v2
+    paths-ignore:
+      - '**.md'
+      - 'doc/**'
+      - '.git/**'
+      - '.vscode/**'
+      - 'postman/**'
+      - 'infraestructure/**'
+  pull_request:
+    branches:
+      - master
+      - main
+      - develop
+    types:
+      - closed
+    paths-ignore:
+      - '**.md'
+      - 'doc/**'
+      - '.git/**'
+      - '.vscode/**'
+      - 'postman/**'
+      - 'infraestructure/**'
+
+env:
+  GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+  GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+  MONGO_DB_URI: ${{ secrets.MONGO_DB_URI }}
+  GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+  GCP_CREDENTIALS_B64: ${{ secrets.GCP_CREDENTIALS_B64 }}
+  ALLOWED_AUTHORS: ${{ vars.ALLOWED_AUTHORS }}
+  PROJECT_ID: ${{ vars.PROJECT_ID }}
+  GAR_LOCATION: ${{ vars.GAR_LOCATION }}
+  SERVICE: ${{ vars.SERVICE }}
+  REGION: ${{ vars.REGION }}
+  APP_NAME: ${{ vars.APP_NAME }}
+  GOOGLE_CALLBACK_URL: ${{ vars.GOOGLE_CALLBACK_URL }}
+  LOG_LEVEL: ${{ vars.LOG_LEVEL }}
+  GLOBAL_PREFIX: ${{ vars.GLOBAL_PREFIX }}
+  REQUEST_TIMEOUT: ${{ vars.REQUEST_TIMEOUT }}
+  NODE_ENV: ${{ vars.NODE_ENV }}
+  PORT: ${{ vars.PORT }}
+  SWAGGER_NAME: ${{ vars.SWAGGER_NAME }}
+  SWAGGER_DESCRIPTION: ${{ vars.SWAGGER_DESCRIPTION }}
+  SWAGGER_VERSION: ${{ vars.SWAGGER_VERSION }}
+  SWAGGER_CONTACT_NAME: ${{ vars.SWAGGER_CONTACT_NAME }}
+  SWAGGER_CONTACT_EMAIL: ${{ vars.SWAGGER_CONTACT_EMAIL }}
+  SWAGGER_URL: ${{ vars.SWAGGER_URL }}
+  DEPLOY_ENV: ${{ github.ref == 'refs/heads/main' && 'prod' || github.ref == 'refs/heads/develop' && 'dev' || 'dev' }}
+  ##   MONGO_DB_NAME: ${{ vars.MONGO_DB_NAME }}
+  ## TODO: change this to use the MONGO_DB_NAME variable or to prod or dev
+  MONGO_DB_NAME: ${{ github.ref == 'refs/heads/master' && 'test' || github.ref == 'refs/heads/develop' && 'test' || 'test' }}
+
+jobs:
+  # Los jobs 'permission' y 'test' se mantienen sin cambios
+  permission:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Check users
+        id: checkusers
+        env:
+          ALLOWED_AUTHORS: ${{ vars.ALLOWED_AUTHORS }}
+        run: |
+          echo "Deploy Environment: ${{ env.DEPLOY_ENV }}"
+          echo "Allowed Authors: ${{ vars.ALLOWED_AUTHORS }}"
+          echo "Github Actor: ${{ github.actor }}"
+          
+          if echo "$ALLOWED_AUTHORS" | grep -q "${{ github.actor }}"; then
+            echo "Allowed actor: ${{ github.actor }}"
+          else
+            echo "Not allowed actor: ${{ github.actor }}"
+            exit 1
+          fi
+
+      - name: ⬇️ Check event
+        id: checkevent
+        run: |
+          echo "Github Event: ${{ github.event_name }}"
+          echo "Github Ref: ${{ github.ref }}"
+          echo "Github Workflow: ${{ github.workflow }}"
+          echo "Github Workflow Path: ${{ github.workflow_path }}"
+          echo "Github Workspace: ${{ github.workspace }}"
+          echo "Github Repository: ${{ github.repository }}"
+          echo "Github Repository Name: ${{ github.repository_name }}"
+          echo "Github Repository Owner: ${{ github.repository_owner }}"
+          echo "Github Repository Name: ${{ github.repository_name }}"
+          echo "Github Repository URL: ${{ github.repository_url }}"
+          echo "Github Repository Default Branch: ${{ github.repository_default_branch }}"
+          echo "Github Run ID: ${{ github.run_id }}"
+          echo "Github Run Number: ${{ github.run_number }}"
+          echo "Github Run Attempt: ${{ github.run_attempt }}"
+          echo "Github Action: ${{ github.action }}"
+          echo "Github Action Path: ${{ github.action_path }}"
+          echo "Github Action Ref: ${{ github.action_ref }}"
+          echo "Github Action Repository: ${{ github.action_repository }}"
+          echo "Github Action Repository Owner: ${{ github.action_repository_owner }}"
+          echo "Github Action Repository Name: ${{ github.action_repository_name }}"
+          echo "Github Action Repository URL: ${{ github.action_repository_url }}"
+          echo "Github Action Workspace: ${{ github.action_workspace }}"
+          echo "Github Action Token: ${{ github.token }}"
+          echo "Github Action Event Path: ${{ github.event_path }}"
+          echo "Github Action Event Name: ${{ github.event_name }}"
+          echo "Github Action Event Path: ${{ github.event_path }}"
+          
+          # if not allowed actor exit 1 else echo "Allowed actor" and continue
+          if [ ${{ contains(fromJSON('["push", "pull_request"]'), github.event_name) }} == false ]; then
+            echo "Not allowed event"
+            exit 1
+          fi
+          echo "Allowed event"
+
+          echo "Allowed Authors: ${{ vars.ALLOWED_AUTHORS }}"
+          echo "Github Actor: ${{ github.actor }}"  
+          echo "Github Actor: ${{ contains('${{ vars.ALLOWED_AUTHORS }}', github.actor) }}"
+          echo "Github Actor: ${{ github.actor }}"
+          echo "Github Event: ${{ github.event_name }}"
+          echo "Github Ref: ${{ github.ref }}"
+          echo "Github Workflow: ${{ github.workflow }}"
+          echo "Github Workflow Path: ${{ github.workflow_path }}"
+
+      - name: The job has failed
+        if: ${{ failure() }}
+        run: |
+          echo "{{ steps.checkusers}}" 
+          
+          echo "The job has failed"
+          echo "Test results: ${{ job.status }}"
+          echo "Test results: ${{ job.steps }}"
+          echo "Deploy Environment: ${{ env.DEPLOY_ENV }}"
+
+      - name: The job has succeeded
+        if: ${{ success() }}
+        run: |
+          echo "The job has succeeded"
+          echo "Test results: ${{ job.status }}"
+          echo "Test results: ${{ job.steps }}"
+          echo "Deploy Environment: ${{ env.DEPLOY_ENV }}"
+  build:
+    runs-on: ubuntu-latest
+    needs: permission
+    if: contains('${{ vars.ALLOWED_AUTHORS }}', github.actor)
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Google Auth
+        id: auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ env.GCP_CREDENTIALS }}'
+
+      - name: ⚙️ Setup Docker Auth
+        id: docker-auth
+        uses: docker/login-action@v3
+        with:
+          registry: '${{ env.GAR_LOCATION }}-docker.pkg.dev'
+          username: _json_key
+          password: '${{ env.GCP_CREDENTIALS }}'
+
+      - name: 🤖🔨 Build and Push Container
+        run: |
+          docker build -t "${{ env.APP_NAME }}:last" .
+          docker tag "${{ env.APP_NAME }}:last" "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/${{ env.APP_NAME }}-${{ env.DEPLOY_ENV }}:${{ github.sha }}"
+          docker tag "${{ env.APP_NAME }}:last" "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/${{ env.APP_NAME }}-${{ env.DEPLOY_ENV }}:$(cat pom.xml | grep -oPm1 "(?<=<version>)[^<]+")"
+          docker tag "${{ env.APP_NAME }}:last" "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/${{ env.APP_NAME }}-${{ env.DEPLOY_ENV }}:latest"
+          docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/${{ env.APP_NAME }}-${{ env.DEPLOY_ENV }}:${{ github.sha }}"
+          docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/${{ env.APP_NAME }}-${{ env.DEPLOY_ENV }}:$(cat pom.xml | grep -oPm1 "(?<=<version>)[^<]+")"
+          docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/${{ env.APP_NAME }}-${{ env.DEPLOY_ENV }}:latest"
+
+      - name: The job has failed
+        if: ${{ failure() }}
+        run: |
+          echo "The job has failed"
+          echo "Test results: ${{ job.status }}"
+          echo "Test results: ${{ job.steps }}"
+          echo "Deploy Environment: ${{ env.DEPLOY_ENV }}"
+
+      - name: The job has succeeded
+        if: ${{ success() }}
+        run: |
+          echo "The job has succeeded"
+          echo "Test results: ${{ job.status }}"
+          echo "Test results: ${{ job.steps }}"
+          echo "Deploy Environment: ${{ env.DEPLOY_ENV }}"
+
+
+  deployment:
+    if: contains('${{ vars.ALLOWED_AUTHORS }}', github.actor)
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: ⚙️ Setup Google Auth
+        id: auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ env.GCP_CREDENTIALS }}'
+
+      - name: ⚙️ Setup Docker Auth
+        id: docker-auth
+        uses: docker/login-action@v3
+        with:
+          registry: '${{ env.GAR_LOCATION }}-docker.pkg.dev'
+          username: _json_key
+          password: '${{ env.GCP_CREDENTIALS }}'
+
+      - name: 📢 Get the URL of the deployed service
+        run: echo ${{ steps.deploy.outputs.url }}
+
+      - name: 🚀 Deploy to Cloud Run (branches)
+        id: deploybranches
+        uses: google-github-actions/deploy-cloudrun@v2
+        if: contains('${{ vars.ALLOWED_AUTHORS }}', github.actor)
+        with:
+          service: ${{ env.APP_NAME }}-${{ env.DEPLOY_ENV }}
+          region: ${{ env.REGION }}
+          image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/${{ env.APP_NAME }}-${{ env.DEPLOY_ENV }}:${{ github.sha || 'latest' }}
+          env_vars: |
+            NODE_ENV=${{ env.NODE_ENV }}
+            LOG_LEVEL=${{ env.LOG_LEVEL }}
+            GLOBAL_PREFIX=${{ env.GLOBAL_PREFIX }}
+            REQUEST_TIMEOUT=${{ env.REQUEST_TIMEOUT }}
+            MONGO_DB_URI=${{ env.MONGO_DB_URI }}
+            MONGO_DB_NAME=${{ env.MONGO_DB_NAME }}
+            GOOGLE_CLIENT_ID=${{ env.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ env.GOOGLE_CLIENT_SECRET }}
+            GOOGLE_CALLBACK_URL=${{ env.GOOGLE_CALLBACK_URL }}
+            GOOGLE_CLOUD_JSON=${{ env.GCP_CREDENTIALS_B64 }}
+            SWAGGER_NAME=${{ env.SWAGGER_NAME }}
+            SWAGGER_DESCRIPTION=${{ env.SWAGGER_DESCRIPTION }}
+            SWAGGER_VERSION=${{ env.SWAGGER_VERSION }}
+            SWAGGER_CONTACT_NAME=${{ env.SWAGGER_CONTACT_NAME }}
+            SWAGGER_CONTACT_EMAIL=${{ env.SWAGGER_CONTACT_EMAIL }}
+            SWAGGER_URL=${{ env.SWAGGER_URL }}
+
+      - name: 📢 Get the URL of the deployed service
+        run: echo ${{ steps.deploybranches.outputs.url }}

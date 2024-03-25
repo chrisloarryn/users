@@ -1,0 +1,69 @@
+name: Validate Java Application
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      # - main
+      - develop
+      - main_v2
+    paths-ignore:
+      - '**.md'
+      - 'doc/**'
+      - '.git/**'
+      - '.vscode/**'
+      - 'postman/**'
+      - 'infraestructure/**'
+  pull_request:
+    branches:
+      - develop
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
+      - ready_for_review
+    paths-ignore:
+      - '**.md'
+      - 'doc/**'
+      - '.git/**'
+      - '.vscode/**'
+      - 'postman/**'
+      - 'infraestructure/**'
+
+env:
+  # Define aquí tus variables de entorno y secretos
+  JAVA_VERSION: '17'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📦 Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'adopt'
+
+      - name: 📦 Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: 📦 Build and test
+        run: mvn -B package --file pom.xml
+
+      - name: 🧪 Test results
+        if: always()
+        run: |
+          echo "Test results: ${{ job.status }}"
