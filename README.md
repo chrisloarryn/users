@@ -5,6 +5,11 @@
 Spring Boot backend for Manage Users Accounts application.
 
 
+## NOTES:
+
+the database scripts will be executed automatically when you start the docker-compose command.
+
+
 ## Installation
 
 ```bash

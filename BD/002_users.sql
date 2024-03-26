@@ -1,0 +1,1 @@
+INSERT INTO public.users (id, created_at, email, is_active, last_login, modified_at, name, password, token) VALUES ('07435ef2-5c66-4a15-8702-e8854f6c5d64', '2024-03-25 22:08:48.146000', 'juan2@rodriguez.org', true, '2024-03-26 01:55:12.149000', '2024-03-26 01:55:12.152000', 'Juan Rodriguez', 'Hunter22', '9532da64-d8ba-4a52-8324-59c400c9e9e5');
