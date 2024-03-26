@@ -6,8 +6,8 @@ if [ -z "$(git status --porcelain)" ]; then
     exit 0
 fi
 
-TAG_MESSAGE=$2
-TICKET_ID=${1:-"users"}
+TAG_MESSAGE=$1
+TICKET_ID=${2:-"users"}
 
 # Añadir todos los cambios al área de staging y hacer un commit.
 echo "Añadiendo cambios y haciendo commit..."
@@ -16,7 +16,7 @@ if [ -z "$TAG_MESSAGE" ]; then
 	git commit --allow-empty-message -m '' --no-verify
     TAG_MESSAGE="deploy to test environment"
 else
-	git commit -m "feat: $TAG_MESSAGE" --no-verify
+	git commit -m "$TAG_MESSAGE" --no-verify
 fi
 
 # Empujar cambios al repositorio remoto.
