@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.*;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 import java.util.List;
 
 @Getter
@@ -19,7 +21,9 @@ public class CreateUserRequest {
 
     @JsonProperty("email")
     @NonNull
-    @NotEmpty(message = "Numero is required")
+    // Email(message = "El formato del correo electrónico es inválido")
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@dominio\\.cl$", message = "El correo debe ser del dominio dominio.cl")
+    @NotEmpty(message = "Email is required")
     private String email;
 
     @JsonProperty("password")

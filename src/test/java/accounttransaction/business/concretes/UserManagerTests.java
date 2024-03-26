@@ -123,6 +123,10 @@ public class UserManagerTests {
 	public void testAdd_() {
 		// Arrange
 		CreateUserRequest request = new CreateUserRequest();
+		request.setEmail("example@examle.com");
+		request.setName("John Doe");
+		request.setPassword("123456Hola");
+		request.setPhones(new ArrayList<>());
 		User todo = new User();
 		CreateUserResponse response = new CreateUserResponse();
 

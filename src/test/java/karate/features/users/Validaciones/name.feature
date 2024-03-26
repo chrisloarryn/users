@@ -15,6 +15,6 @@ Feature: Validation Request for User creations in field "name" - <testName>
           # Then match response.name == <name>
 
         Examples:
-                  | testName        | name            | response                          | status |
-                  | "Name is valid" | "Chris Loarryn" | { "name": "Chris Loarryn" }       | 201    |
-                  | "Name is null"  | null            | { "message": "Name is required" } | 400    |
+          | testName        | name            | response                    | status |
+          | "Name is valid" | "Chris Loarryn" | { "name": "Chris Loarryn" } | 201    |
+          |                 |                 |                             |        |

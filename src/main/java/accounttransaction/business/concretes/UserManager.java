@@ -3,8 +3,15 @@ package accounttransaction.business.concretes;
 import accounttransaction.business.abstracts.UserService;
 import accounttransaction.business.dto.responses.create.LoginUserResponse;
 import accounttransaction.entities.Phone;
+import accounttransaction.exceptions.BadRequestException;
+import accounttransaction.exceptions.UnauthorizedException;
 import lombok.AllArgsConstructor;
 
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import org.hibernate.cfg.Environment;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import accounttransaction.business.dto.requests.create.CreateUserRequest;
@@ -18,6 +25,7 @@ import accounttransaction.entities.User;
 import accounttransaction.entities.UserNotFoundException;
 import accounttransaction.repository.UserRepository;
 import accounttransaction.utils.mappers.ModelMapperService;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Date;
 import java.util.List;
@@ -32,6 +40,9 @@ public class UserManager implements UserService {
     private final UserRepository repo;
     private final ModelMapperService mapper;
     private final UserBusinessRules rules;
+
+
+    // read a variable from the application.properties file for password regex.
 
     @Override
     public List<GetAllUsersResponse> getAll() {
@@ -60,7 +71,7 @@ public class UserManager implements UserService {
                     "User with email " + userRequest.getEmail() + " does not exists");
         }
         if (!rules.validatePassword(userRequest.getPassword(), user.getPassword())) {
-            throw new UserNotFoundException(
+            throw new UnauthorizedException(
                     "Invalid password for user with email " + userRequest.getEmail());
         }
         updateTokenAndLoginInformation(user);
@@ -70,6 +81,23 @@ public class UserManager implements UserService {
 
     @Override
     public CreateUserResponse add(CreateUserRequest userRequest) {
+        // "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número."
+        String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$";
+
+        if (!userRequest.getEmail().matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$")) {
+            throw new BadRequestException("El formato del correo electrónico es inválido.", HttpStatus.BAD_REQUEST.toString());
+        }
+
+        // compare if passwordRegex is not null or empty
+        if (passwordRegex.isEmpty()) {
+            throw new BadRequestException("No se ha configurado el regex para la contraseña.", HttpStatus.BAD_REQUEST.toString());
+        }
+
+        // validate user password with a regex
+        if (!userRequest.getPassword().matches(passwordRegex)) {
+            throw new BadRequestException("La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.", HttpStatus.BAD_REQUEST.toString());
+        }
+
         User user = repo.findByEmail(userRequest.getEmail()).orElse(null);
         boolean userExists = user != null;
         boolean isNewUser = false;

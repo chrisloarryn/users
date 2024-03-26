@@ -3,6 +3,9 @@ package accounttransaction.api.controllers;
 import accounttransaction.business.abstracts.UserService;
 import accounttransaction.business.dto.responses.create.LoginUserResponse;
 import lombok.AllArgsConstructor;
+import org.hibernate.cfg.Environment;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
@@ -22,11 +25,16 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@AllArgsConstructor
 @RequestMapping("/api/auth")
+// @Api
 public class UserController {
     private final UserService service;
 
+    public UserController(UserService service) {
+        this.service = service;
+    }
+
+    // @Tag(name = "get", description = "GET methods of Employee APIs")
     @GetMapping
     public List<GetAllUsersResponse> getAll() {
         return service.getAll();
@@ -39,13 +47,13 @@ public class UserController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public CreateUserResponse add(@RequestBody @NotNull @Validated CreateUserRequest request) {
+    public CreateUserResponse add(@Valid @RequestBody CreateUserRequest request) {
         return service.add(request);
     }
 
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
-    public LoginUserResponse login(@RequestBody @NotNull @Validated CreateUserRequest request) {
+    public LoginUserResponse login(@Valid @RequestBody CreateUserRequest request) {
         return service.login(request);
     }
 

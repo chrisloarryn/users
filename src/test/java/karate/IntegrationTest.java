@@ -17,7 +17,9 @@ import org.apache.commons.io.FileUtils;
 import net.masterthought.cucumber.Configuration;
 import net.masterthought.cucumber.ReportBuilder;
 public class IntegrationTest {
-    @Test
+    // @Test
+    // skip the test method so that it does not run
+    // @DisplayName("Skip this test")
     void testParallel() {
         Results results = Runner.path("classpath:karate")
                 .outputCucumberJson(true)

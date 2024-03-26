@@ -4,6 +4,7 @@
 
 Spring Boot backend for Manage Users Accounts application.
 
+
 ## Installation
 
 ```bash
@@ -26,7 +27,7 @@ docker-compose up
 
 ## Swagger
 
-Swagger is available at: http://localhost:8080/swagger-ui/index.html
+Swagger is available at: http://localhost:8080/swagger-ui/index.htmlhttp://localhost:8080/swagger-ui/index.html
 
 
 ## Executing karate tests
