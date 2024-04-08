@@ -1,5 +1,6 @@
 package accounttransaction.api.controllers;
 
+import accounttransaction.api.controllers.concretes.UserControllerImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -24,7 +25,7 @@ import static org.mockito.Mockito.*;
 
 public class UserControllerTests {
 
-    private UserController todoController;
+    private UserControllerImpl todoController;
 
     @Mock
     private UserService todoService;
@@ -32,7 +33,7 @@ public class UserControllerTests {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        todoController = new UserController(todoService);
+        todoController = new UserControllerImpl(todoService);
     }
 
     @Test
