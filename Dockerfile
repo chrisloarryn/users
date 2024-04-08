@@ -1,5 +1,5 @@
 # Etapa de construcción
-FROM maven:3-eclipse-temurin-21-alpine AS build
+FROM maven:3-eclipse-temurin-22-alpine AS build
 WORKDIR /app
 
 COPY src ./src
