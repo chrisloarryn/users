@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.NotEmpty;
 import java.util.Date;
 import java.util.UUID;
 
@@ -27,7 +26,7 @@ public class PhoneResponse {
     private String citycode;
 
     @JsonProperty("countrycode")
-    private String contrycode;
+    private String countrycode;
 
     @JsonIgnore
     private User user;

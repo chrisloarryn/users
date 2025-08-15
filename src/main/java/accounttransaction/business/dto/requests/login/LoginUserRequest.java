@@ -1,29 +1,21 @@
-package accounttransaction.business.dto.requests.update;
+package accounttransaction.business.dto.requests.login;
 
-import accounttransaction.business.dto.requests.create.PhoneRequest;
-import accounttransaction.entities.enums.AccountType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.*;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
-import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateUserRequest {
-    @JsonProperty("name")
-    @NonNull
-    @NotEmpty(message = "Name is required")
-    private String name;
-
+public class LoginUserRequest {
     @JsonProperty("email")
     @NonNull
-    @NotEmpty(message = "Numero is required")
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@(dominio\\.(cl|com)|gmail\\.(cl|com))$", message = "El correo debe ser del dominio dominio.cl, dominio.com, gmail.cl o gmail.com")
+    @NotEmpty(message = "Email is required")
     private String email;
 
     @JsonProperty("password")
@@ -32,9 +24,4 @@ public class UpdateUserRequest {
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])(?=.{8,}).*$", 
             message = "La contraseña debe cumplir con los requisitos de seguridad: al menos 8 caracteres, una letra minúscula, una letra mayúscula, un número y un carácter especial (!@#$%^&*).")
     private String password;
-
-    @JsonProperty("phones")
-    @NonNull
-    @NotEmpty(message = "Phones is required")
-    private List<PhoneRequest> phones;
 }

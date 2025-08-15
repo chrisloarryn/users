@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 @ControllerAdvice
 @Order(1)
 @ResponseBody
-public class ControllerExceptionHandler { // extends ResponseEntityExceptionHandler {
+public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Map<String, String> typeToErrorMessage = new HashMap<>();
 
     static {
@@ -83,23 +83,6 @@ public class ControllerExceptionHandler { // extends ResponseEntityExceptionHand
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
-        String readableMessage = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
-        String captureField = extractFieldName(readableMessage);
-        String errorType = extractErrorType(readableMessage);
-
-        String errorMessage = typeToErrorMessage.getOrDefault(errorType, "La solicitud contiene campos con formato inválido o inesperado. Verifica la documentación.");
-
-        List<String> errors = Collections.singletonList(errorMessage);
-
-        ApiErrorResponse apiError = new ApiErrorResponse(
-                HttpStatus.BAD_REQUEST,
-                "Error de formato en la solicitud: " + captureField,
-                errors);
-
-        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
-    }
 
     private String extractFieldName(String message) {
         Pattern pattern = Pattern.compile("from String \"(.*?)\":");
@@ -114,14 +97,13 @@ public class ControllerExceptionHandler { // extends ResponseEntityExceptionHand
     }
 
     @ExceptionHandler(BadRequestException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<?> handleBadRequestException(BadRequestException ex) {
-        ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.BAD_REQUEST);
-        BadRequestException body = BadRequestException.builder()
-                .message(ex.getMessage())
-                .code(ex.getCode())
-                .build();
+        ApiErrorResponse apiError = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Bad request error",
+                Collections.singletonList(ex.getMessage())
+        );
 
-        return builder.body(body);
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 }

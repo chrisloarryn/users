@@ -1,6 +1,7 @@
 package accounttransaction.business.abstracts;
 
 import accounttransaction.business.dto.requests.create.CreateUserRequest;
+import accounttransaction.business.dto.requests.login.LoginUserRequest;
 import accounttransaction.business.dto.requests.update.UpdateUserRequest;
 import accounttransaction.business.dto.responses.create.CreateUserResponse;
 import accounttransaction.business.dto.responses.create.LoginUserResponse;
@@ -17,7 +18,7 @@ public interface UserService {
     GetUserResponse getById(UUID id);
 
     CreateUserResponse add(CreateUserRequest todo);
-    LoginUserResponse login(CreateUserRequest todo);
+    LoginUserResponse login(LoginUserRequest todo);
 
     UpdateUserResponse update(UUID id, UpdateUserRequest todo);
 

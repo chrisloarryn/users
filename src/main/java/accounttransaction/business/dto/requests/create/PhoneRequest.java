@@ -10,13 +10,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 
-import javax.validation.constraints.NotEmpty;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,9 +36,9 @@ public class PhoneRequest {
     @NotEmpty(message = "City code is required")
     private String citycode;
 
-    @JsonProperty("contrycode")
+    @JsonProperty("countrycode")
     @NotEmpty(message = "Country code is required")
-    private String contrycode;
+    private String countrycode;
 
     @JsonIgnore
     private User user;

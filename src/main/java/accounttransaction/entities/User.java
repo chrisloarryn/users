@@ -14,6 +14,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -25,8 +27,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.Date;
 import java.util.List;
-
-import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -49,7 +49,10 @@ public class User implements Serializable {
     private String name;
 
     @JsonProperty("email")
-    @NotEmpty(message = "Numero is required")
+    @NotEmpty(message = "Email is required")
+    // @Email(message = "Email format is invalid")
+    // allow dominio.cl, dominio.com, gmail.cl, and gmail.com addresses
+    @Email(message = "Email format is invalid", regexp = "^[a-zA-Z0-9._%+-]+@(dominio\\.(cl|com)|gmail\\.(cl|com))$")
     @Column(name = "email", nullable = false, unique = true, updatable = true)
     private String email;
 

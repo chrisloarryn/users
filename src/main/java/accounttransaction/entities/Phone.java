@@ -40,9 +40,9 @@ public class Phone {
     @Column(name = "city_code")
     private String citycode;
 
-    @JsonProperty("contrycode")
+    @JsonProperty("countrycode")
     @Column(name = "country_code")
-    private String contrycode;
+    private String countrycode;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)

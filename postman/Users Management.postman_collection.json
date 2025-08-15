@@ -11,13 +11,13 @@
 			"name": "Users",
 			"item": [
 				{
-					"name": "Create User",
+					"name": "Create Or Update User",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Juan Rodriguez\",\n    \"email\": \"juan2@rodriguez.org\",\n    \"password\": \"hunter2\",\n    \"phones\": [\n        {\n            \"number\": \"1234567\",\n            \"citycode\": \"1\",\n            \"contrycode\": \"57\"\n        }\n    ]\n}",
+							"raw": "{\n    \"name\": \"Juan Rodriguez\",\n    \"email\": \"juan2@gmail.com\",\n    \"password\": \"Hunter22@@\",\n    \"phones\": [\n        {\n            \"number\": \"1234567\",\n            \"citycode\": \"1\",\n            \"countrycode\": \"57\"\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -25,14 +25,44 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:8080/api/users",
+							"raw": "localhost:8080/api/users/register",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
 								"api",
-								"users"
+								"users",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"juan2@gmail.com\",\n    \"password\": \"Hunter22@@\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/users/login",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"users",
+								"login"
 							]
 						}
 					},
@@ -44,7 +74,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:8080/api/users/7b9b0499-9bb3-4e7f-8385-5e8b80fa3760",
+							"raw": "localhost:8080/api/users/39d0a2ae-24c4-43f1-9bfb-313110f28b99",
 							"host": [
 								"localhost"
 							],
@@ -52,7 +82,7 @@
 							"path": [
 								"api",
 								"users",
-								"7b9b0499-9bb3-4e7f-8385-5e8b80fa3760"
+								"39d0a2ae-24c4-43f1-9bfb-313110f28b99"
 							]
 						}
 					},
@@ -72,26 +102,6 @@
 							"path": [
 								"api",
 								"users"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete User",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "localhost:8080/api/users/7f0f4a6a-87f9-4be9-853c-fe0d331908bc",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"users",
-								"7f0f4a6a-87f9-4be9-853c-fe0d331908bc"
 							]
 						}
 					},

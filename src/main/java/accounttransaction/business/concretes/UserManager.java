@@ -11,10 +11,12 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import org.hibernate.cfg.Environment;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import accounttransaction.business.dto.requests.create.CreateUserRequest;
+import accounttransaction.business.dto.requests.login.LoginUserRequest;
 import accounttransaction.business.dto.requests.update.UpdateUserRequest;
 import accounttransaction.business.dto.responses.create.CreateUserResponse;
 import accounttransaction.business.dto.responses.get.GetAllUsersResponse;
@@ -25,7 +27,6 @@ import accounttransaction.entities.User;
 import accounttransaction.entities.UserNotFoundException;
 import accounttransaction.repository.UserRepository;
 import accounttransaction.utils.mappers.ModelMapperService;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Date;
 import java.util.List;
@@ -34,15 +35,20 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
 public class UserManager implements UserService {
 
     private final UserRepository repo;
     private final ModelMapperService mapper;
     private final UserBusinessRules rules;
 
+    @Value("${password.regexp}")
+    private String passwordRegex;
 
-    // read a variable from the application.properties file for password regex.
+    public UserManager(UserRepository repo, ModelMapperService mapper, UserBusinessRules rules) {
+        this.repo = repo;
+        this.mapper = mapper;
+        this.rules = rules;
+    }
 
     @Override
     public List<GetAllUsersResponse> getAll() {
@@ -64,7 +70,7 @@ public class UserManager implements UserService {
     }
 
     @Override
-    public LoginUserResponse login(CreateUserRequest userRequest) {
+    public LoginUserResponse login(LoginUserRequest userRequest) {
         User user = repo.findByEmail(userRequest.getEmail()).orElse(null);
         if (user == null) {
             throw new UserNotFoundException(
@@ -81,21 +87,18 @@ public class UserManager implements UserService {
 
     @Override
     public CreateUserResponse add(CreateUserRequest userRequest) {
-        // "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número."
-        String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$";
-
         if (!userRequest.getEmail().matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$")) {
             throw new BadRequestException("El formato del correo electrónico es inválido.", HttpStatus.BAD_REQUEST.toString());
         }
 
         // compare if passwordRegex is not null or empty
-        if (passwordRegex.isEmpty()) {
+        if (passwordRegex == null || passwordRegex.isEmpty()) {
             throw new BadRequestException("No se ha configurado el regex para la contraseña.", HttpStatus.BAD_REQUEST.toString());
         }
 
         // validate user password with a regex
         if (!userRequest.getPassword().matches(passwordRegex)) {
-            throw new BadRequestException("La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.", HttpStatus.BAD_REQUEST.toString());
+            throw new BadRequestException("La contraseña debe cumplir con los requisitos de seguridad: al menos 8 caracteres, una letra minúscula, una letra mayúscula, un número y un carácter especial (!@#$%^&*).", HttpStatus.BAD_REQUEST.toString());
         }
 
         User user = repo.findByEmail(userRequest.getEmail()).orElse(null);
@@ -129,7 +132,7 @@ public class UserManager implements UserService {
                     boolean phoneExists = user.getPhones().stream()
                             .anyMatch(existingPhone -> existingPhone.getNumber().equals(newPhone.getNumber())
                                     && existingPhone.getCitycode().equals(newPhone.getCitycode())
-                                    && Objects.equals(existingPhone.getContrycode(), newPhone.getContrycode()));
+                                    && Objects.equals(existingPhone.getCountrycode(), newPhone.getCountrycode()));
                     if (!phoneExists) {
                         newPhone.setUser(user);
                         user.getPhones().add(newPhone);
@@ -144,18 +147,15 @@ public class UserManager implements UserService {
 
 
     private void updateTokenAndRegisterInformation(User user) {
-        UUID newUUID = UUID.randomUUID();
+        updateTokenAndLoginInformation(user);
         Date date = new Date();
-        user.setToken(newUUID);
         user.setModifiedAt(date);
-        user.setLastLogin(date);
     }
 
     private void updateTokenAndLoginInformation(User user) {
         UUID newUUID = UUID.randomUUID();
         Date date = new Date();
         user.setToken(newUUID);
-        // user.setModifiedAt(date);
         user.setLastLogin(date);
     }
 
@@ -165,6 +165,17 @@ public class UserManager implements UserService {
             throw new UserNotFoundException(
                     "Account with id " + id + " does not exists");
         }
+
+        // compare if passwordRegex is not null or empty
+        if (passwordRegex == null || passwordRegex.isEmpty()) {
+            throw new BadRequestException("No se ha configurado el regex para la contraseña.", HttpStatus.BAD_REQUEST.toString());
+        }
+
+        // validate user password with a regex
+        if (!todoRequest.getPassword().matches(passwordRegex)) {
+            throw new BadRequestException("La contraseña debe cumplir con los requisitos de seguridad: al menos 8 caracteres, una letra minúscula, una letra mayúscula, un número y un carácter especial (!@#$%^&*).", HttpStatus.BAD_REQUEST.toString());
+        }
+
         var todo = mapper.forRequest().map(todoRequest, User.class);
         todo.setId(id);
         repo.save(todo);

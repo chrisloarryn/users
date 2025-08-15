@@ -2,6 +2,7 @@ package accounttransaction.api.controllers.abstracts;
 
 import accounttransaction.business.abstracts.UserService;
 import accounttransaction.business.dto.requests.create.CreateUserRequest;
+import accounttransaction.business.dto.requests.login.LoginUserRequest;
 import accounttransaction.business.dto.requests.update.UpdateUserRequest;
 import accounttransaction.business.dto.responses.create.CreateUserResponse;
 import accounttransaction.business.dto.responses.create.LoginUserResponse;
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,7 +41,7 @@ public interface UserController {
 
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
-    public LoginUserResponse login(@Valid @RequestBody CreateUserRequest request);
+    public LoginUserResponse login(@Valid @RequestBody LoginUserRequest request);
 
     @PutMapping("/{id}")
     public UpdateUserResponse update(@PathVariable UUID id, @Valid @RequestBody UpdateUserRequest request);

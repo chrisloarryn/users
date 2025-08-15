@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.*;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import java.util.List;
 
 @Getter
@@ -22,13 +22,15 @@ public class CreateUserRequest {
     @JsonProperty("email")
     @NonNull
     // Email(message = "El formato del correo electrónico es inválido")
-    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@dominio\\.cl$", message = "El correo debe ser del dominio dominio.cl")
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@(dominio\\.(cl|com)|gmail\\.(cl|com))$", message = "El correo debe ser del dominio dominio.cl, dominio.com, gmail.cl o gmail.com")
     @NotEmpty(message = "Email is required")
     private String email;
 
     @JsonProperty("password")
     @NonNull
     @NotEmpty(message = "Password is required")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])(?=.{8,}).*$", 
+            message = "La contraseña debe cumplir con los requisitos de seguridad: al menos 8 caracteres, una letra minúscula, una letra mayúscula, un número y un carácter especial (!@#$%^&*).")
     private String password;
 
     @JsonProperty("phones")

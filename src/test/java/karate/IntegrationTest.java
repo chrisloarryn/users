@@ -1,11 +1,7 @@
 package karate;
 
-import com.intuit.karate.junit5.Karate;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
 import com.intuit.karate.Results;
 import com.intuit.karate.Runner;
-import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.ArrayList;
