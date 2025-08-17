@@ -11,103 +11,145 @@
 			"name": "Users",
 			"item": [
 				{
-					"name": "Create Or Update User",
+					"name": "Register",
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Juan Rodriguez\",\n    \"email\": \"juan2@gmail.com\",\n    \"password\": \"Hunter22@@\",\n    \"phones\": [\n        {\n            \"number\": \"1234567\",\n            \"citycode\": \"1\",\n            \"countrycode\": \"57\"\n        }\n    ]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"raw": "{\n  \"name\": \"Juan Rodriguez\",\n  \"email\": \"juan2@gmail.com\",\n  \"password\": \"Hunter22@@\",\n  \"phones\": [\n    {\n      \"number\": \"1234567\",\n      \"citycode\": \"1\",\n      \"countrycode\": \"57\"\n    }\n  ]\n}",
+							"options": { "raw": { "language": "json" } }
 						},
 						"url": {
-							"raw": "localhost:8080/api/users/register",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"users",
-								"register"
-							]
+							"raw": "{{baseUrl}}/api/users/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api","users","register"]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Login User",
+					"name": "Login",
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"juan2@gmail.com\",\n    \"password\": \"Hunter22@@\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"raw": "{\n  \"email\": \"juan2@gmail.com\",\n  \"password\": \"Hunter22@@\"\n}",
+							"options": { "raw": { "language": "json" } }
 						},
 						"url": {
-							"raw": "localhost:8080/api/users/login",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"users",
-								"login"
-							]
+							"raw": "{{baseUrl}}/api/users/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api","users","login"]
 						}
 					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"if (jsonData && jsonData.jwt) {",
+									"  pm.collectionVariables.set('jwt', jsonData.jwt);",
+									"  pm.test('JWT token captured', function () { pm.expect(pm.collectionVariables.get('jwt')).to.be.a('string'); });",
+									"} else {",
+									"  pm.test('JWT token present', function () { pm.expect.fail('No jwt in response'); });",
+									"}"
+								]
+							}
+						}
+					],
 					"response": []
 				},
 				{
-					"name": "Get User",
+					"name": "Google SSO (Initiate OAuth2)",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:8080/api/users/39d0a2ae-24c4-43f1-9bfb-313110f28b99",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"users",
-								"39d0a2ae-24c4-43f1-9bfb-313110f28b99"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get All User",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "localhost:8080/api/users",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"users"
-							]
+							"raw": "{{baseUrl}}/oauth2/authorization/google",
+							"host": ["{{baseUrl}}"],
+							"path": ["oauth2","authorization","google"]
 						}
 					},
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Products",
+			"auth": {
+				"type": "bearer",
+				"bearer": [ { "key": "token", "value": "{{jwt}}", "type": "string" } ]
+			},
+			"item": [
+				{
+					"name": "List Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/products", "host": ["{{baseUrl}}"], "path": ["api","products"] }
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product by Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/products/{{productId}}", "host": ["{{baseUrl}}"], "path": ["api","products","{{productId}}"] }
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product",
+					"request": {
+						"method": "POST",
+						"header": [ { "key": "Content-Type", "value": "application/json" } ],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Sample Product\",\n  \"price\": 12.34\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/products", "host": ["{{baseUrl}}"], "path": ["api","products"] }
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product",
+					"request": {
+						"method": "PUT",
+						"header": [ { "key": "Content-Type", "value": "application/json" } ],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Name\",\n  \"price\": 99.99\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/products/{{productId}}", "host": ["{{baseUrl}}"], "path": ["api","products","{{productId}}"] }
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/products/{{productId}}", "host": ["{{baseUrl}}"], "path": ["api","products","{{productId}}"] }
+					},
+					"response": []
+				}
+			]
 		}
+	],
+	"variable": [
+		{ "key": "baseUrl", "value": "http://localhost:8080" },
+		{ "key": "jwt", "value": "" },
+		{ "key": "productId", "value": "" }
 	]
 }

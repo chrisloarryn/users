@@ -27,9 +27,18 @@ public class UserControllerImpl implements UserController {
     @Autowired
     private UserService service;
 
+    private final accounttransaction.security.JwtTokenProvider jwtTokenProvider;
+
     // Constructor for testing purposes
     public UserControllerImpl(UserService service) {
         this.service = service;
+        this.jwtTokenProvider = null; // for tests
+    }
+
+    @Autowired
+    public UserControllerImpl(UserService service, accounttransaction.security.JwtTokenProvider jwtTokenProvider) {
+        this.service = service;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
@@ -49,7 +58,12 @@ public class UserControllerImpl implements UserController {
 
     @Override
     public LoginUserResponse login(@Valid @RequestBody LoginUserRequest request) {
-        return service.login(request);
+        LoginUserResponse resp = service.login(request);
+        if (jwtTokenProvider != null) {
+            String jwt = jwtTokenProvider.generateToken(request.getEmail());
+            resp.setJwt(jwt);
+        }
+        return resp;
     }
 
     @Override

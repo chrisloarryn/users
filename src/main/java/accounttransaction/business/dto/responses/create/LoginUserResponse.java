@@ -14,21 +14,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginUserResponse {
-//    @JsonProperty("name")
-//    private String name;
-//
-//    @JsonProperty("email")
-//    private String email;
-//
-//    @JsonProperty("password")
-//    private String password;
-//
-//    @JsonProperty("phones")
-//    private List<PhoneRequest> phones;
-//
-//    @JsonProperty("fecha_creacion")
-//    private Date createdAt;
-
     @JsonProperty("id")
     private UUID id;
 
@@ -46,4 +31,7 @@ public class LoginUserResponse {
 
     @JsonProperty("isactive")
     private boolean isActive;
+
+    @JsonProperty("jwt")
+    private String jwt;
 }

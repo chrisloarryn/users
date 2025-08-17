@@ -29,12 +29,6 @@ import java.util.UUID;
 
 @Validated
 public interface UserController {
-    @GetMapping
-    public List<GetAllUsersResponse> getAll();
-
-    @GetMapping("/{id}")
-    public GetUserResponse getById(@PathVariable UUID id);
-
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public CreateUserResponse add(@Valid @RequestBody CreateUserRequest request);
@@ -43,10 +37,9 @@ public interface UserController {
     @ResponseStatus(HttpStatus.OK)
     public LoginUserResponse login(@Valid @RequestBody LoginUserRequest request);
 
-    @PutMapping("/{id}")
+    // Non-auth administrative methods preserved for internal/test use only (no HTTP mapping)
+    public List<GetAllUsersResponse> getAll();
+    public GetUserResponse getById(@PathVariable UUID id);
     public UpdateUserResponse update(@PathVariable UUID id, @Valid @RequestBody UpdateUserRequest request);
-
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID id);
 }

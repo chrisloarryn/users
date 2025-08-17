@@ -1,0 +1,30 @@
+meta {
+  name: register
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/users/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Juan Rodriguez",
+    "email": "juan2@gmail.com",
+    "password": "Hunter22@@",
+    "phones": [
+      {
+        "number": "1234567",
+        "citycode": "1",
+        "countrycode": "57"
+      }
+    ]
+  }
+}
+
+settings {
+  encodeUrl: true
+}

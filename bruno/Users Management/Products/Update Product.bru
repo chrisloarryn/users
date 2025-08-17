@@ -1,0 +1,20 @@
+meta {
+  name: "Update Product"
+  type: http
+  seq: 4
+}
+
+request {
+  method: PUT
+  url: "{{baseUrl}}/api/products/{{productId}}"
+  headers {
+    Authorization: "Bearer {{jwt}}"
+    Content-Type: application/json
+  }
+  body: json("""
+  {
+    "name": "Updated Name",
+    "price": 99.99
+  }
+  """)
+}

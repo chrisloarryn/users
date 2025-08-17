@@ -1,0 +1,13 @@
+meta {
+  name: "Get Product by Id"
+  type: http
+  seq: 2
+}
+
+request {
+  method: GET
+  url: "{{baseUrl}}/api/products/{{productId}}"
+  headers {
+    Authorization: "Bearer {{jwt}}"
+  }
+}
