@@ -8,7 +8,7 @@ request {
   method: PUT
   url: "{{baseUrl}}/api/products/{{productId}}"
   headers {
-    Authorization: "Bearer {{jwt}}"
+    Authorization: Bearer {{jwt}}
     Content-Type: application/json
   }
   body: json("""
