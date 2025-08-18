@@ -10,8 +10,8 @@ on:
   push:
     branches:
       # - main
-      - develop
-      - main_v2
+      - developff
+      - main_v2ff
     paths-ignore:
       - '**.md'
       - 'doc/**'
