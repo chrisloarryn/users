@@ -36,13 +36,18 @@ public class UserManager implements UserService {
     private final ModelMapperService mapper;
     private final UserBusinessRules rules;
 
-    @Value("${app.security.password.regex:^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])(?=.{8,}).*$}")
+    private static final String DEFAULT_PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])(?=.{8,}).*$";
+    @Value("${app.security.password.regex:}")
     private String passwordRegex;
 
     public UserManager(UserRepository repo, ModelMapperService mapper, UserBusinessRules rules) {
         this.repo = repo;
         this.mapper = mapper;
         this.rules = rules;
+        // Fallback for non-Spring contexts (e.g., plain unit tests): ensure a default regex is available
+        if (this.passwordRegex == null || this.passwordRegex.isEmpty()) {
+            this.passwordRegex = DEFAULT_PASSWORD_REGEX;
+        }
     }
 
     @Override
