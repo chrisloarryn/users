@@ -54,7 +54,14 @@ public class UserManager implements UserService {
     private void initPasswordRegex() {
         if (this.passwordRegex == null || this.passwordRegex.isEmpty()) {
             this.passwordRegex = DEFAULT_PASSWORD_REGEX;
-        }
+    @Value("${app.security.password.regex:^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])(?=.{8,}).*$}")
+    private String passwordRegex;
+
+    public UserManager(UserRepository repo, ModelMapperService mapper, UserBusinessRules rules) {
+        this.repo = repo;
+        this.mapper = mapper;
+        this.rules = rules;
+        // No fallback needed: @Value annotation provides default regex.
     }
 
     @Override
