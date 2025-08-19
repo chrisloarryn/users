@@ -37,7 +37,7 @@ public class UserManager implements UserService {
     private final UserBusinessRules rules;
 
     @Value("${app.security.password.regex}")
-    private String passwordRegex = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*]).{8,}$";
+    private String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])(?=.{8,}).*$";
 
     public UserManager(UserRepository repo, ModelMapperService mapper, UserBusinessRules rules) {
         this.repo = repo;
