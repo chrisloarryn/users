@@ -5,12 +5,7 @@ import accounttransaction.business.dto.responses.create.LoginUserResponse;
 import accounttransaction.entities.Phone;
 import accounttransaction.exceptions.BadRequestException;
 import accounttransaction.exceptions.UnauthorizedException;
-import lombok.AllArgsConstructor;
 
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import org.hibernate.cfg.Environment;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -41,8 +36,8 @@ public class UserManager implements UserService {
     private final ModelMapperService mapper;
     private final UserBusinessRules rules;
 
-    @Value("${password.regexp}")
-    private String passwordRegex;
+    @Value("${app.security.password.regex.regexp:}")
+    private String passwordRegex = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*]).{8,}$";
 
     public UserManager(UserRepository repo, ModelMapperService mapper, UserBusinessRules rules) {
         this.repo = repo;
@@ -166,14 +161,17 @@ public class UserManager implements UserService {
                     "Account with id " + id + " does not exists");
         }
 
-        // compare if passwordRegex is not null or empty
-        if (passwordRegex == null || passwordRegex.isEmpty()) {
-            throw new BadRequestException("No se ha configurado el regex para la contraseña.", HttpStatus.BAD_REQUEST.toString());
-        }
+        // validate password only if provided
+        if (todoRequest.getPassword() != null && !todoRequest.getPassword().isEmpty()) {
+            // compare if passwordRegex is not null or empty
+            if (passwordRegex == null || passwordRegex.isEmpty()) {
+                throw new BadRequestException("No se ha configurado el regex para la contraseña.", HttpStatus.BAD_REQUEST.toString());
+            }
 
-        // validate user password with a regex
-        if (!todoRequest.getPassword().matches(passwordRegex)) {
-            throw new BadRequestException("La contraseña debe cumplir con los requisitos de seguridad: al menos 8 caracteres, una letra minúscula, una letra mayúscula, un número y un carácter especial (!@#$%^&*).", HttpStatus.BAD_REQUEST.toString());
+            // validate user password with a regex
+            if (!todoRequest.getPassword().matches(passwordRegex)) {
+                throw new BadRequestException("La contraseña debe cumplir con los requisitos de seguridad: al menos 8 caracteres, una letra minúscula, una letra mayúscula, un número y un carácter especial (!@#$%^&*).", HttpStatus.BAD_REQUEST.toString());
+            }
         }
 
         var todo = mapper.forRequest().map(todoRequest, User.class);
