@@ -38,7 +38,10 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest(properties = {
-  "app.security.password.regex=^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,}).*$"
+// The password regex is defined in UserManager.DEFAULT_PASSWORD_REGEX.
+// To avoid duplication, ensure this value matches the constant in production code.
+@SpringBootTest(properties = {
+  "app.security.password.regex=" + accounttransaction.business.concretes.UserManager.DEFAULT_PASSWORD_REGEX
 })
 @ActiveProfiles("test")
 public class UserManagerTests {
