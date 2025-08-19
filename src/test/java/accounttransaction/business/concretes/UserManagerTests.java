@@ -29,12 +29,18 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
+@SpringBootTest(properties = {
+  "app.security.password.regex=^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,}$"
+})
+@ActiveProfiles("test")
 public class UserManagerTests {
 
 	private UserService todoService;
@@ -125,7 +131,7 @@ public class UserManagerTests {
 		CreateUserRequest request = new CreateUserRequest();
 		request.setEmail("example@examle.com");
 		request.setName("John Doe");
-		request.setPassword("123456Hola");
+		request.setPassword("123456Hola**");
 		request.setPhones(new ArrayList<>());
 		User todo = new User();
 		CreateUserResponse response = new CreateUserResponse();
