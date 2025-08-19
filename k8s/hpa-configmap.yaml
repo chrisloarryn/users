@@ -24,6 +24,7 @@ spec:
 #  name: env-cuenta-movimiento-backend
 #  namespace: chrisloarryn-CONFIG_ENVIRONMENT
 #data:
+#  APP_SECURITY_PASSWORD_REGEX: '^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*]).{8,}$'
 
 
 ---
