@@ -44,7 +44,14 @@ public class UserManager implements UserService {
         this.repo = repo;
         this.mapper = mapper;
         this.rules = rules;
-        // Fallback for non-Spring contexts (e.g., plain unit tests): ensure a default regex is available
+    }
+
+    /**
+     * Ensures that passwordRegex has a default value if not set by Spring or in non-Spring contexts.
+     * This method runs after dependency injection, so the fallback works in both Spring and plain unit tests.
+     */
+    @PostConstruct
+    private void initPasswordRegex() {
         if (this.passwordRegex == null || this.passwordRegex.isEmpty()) {
             this.passwordRegex = DEFAULT_PASSWORD_REGEX;
         }
