@@ -6,6 +6,7 @@ import accounttransaction.entities.Phone;
 import accounttransaction.exceptions.BadRequestException;
 import accounttransaction.exceptions.UnauthorizedException;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,7 @@ public class UserManager implements UserService {
     private final ModelMapperService mapper;
     private final UserBusinessRules rules;
 
-    private static final String DEFAULT_PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])(?=.{8,}).*$";
+    public static final String DEFAULT_PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])(?=.{8,}).*$";
     @Value("${app.security.password.regex:}")
     private String passwordRegex;
 
@@ -44,6 +45,10 @@ public class UserManager implements UserService {
         this.repo = repo;
         this.mapper = mapper;
         this.rules = rules;
+        // Fallback for non-Spring contexts (e.g., plain unit tests) where @Value is not injected
+        if (this.passwordRegex == null || this.passwordRegex.isEmpty()) {
+            this.passwordRegex = DEFAULT_PASSWORD_REGEX;
+        }
     }
 
     /**
@@ -54,15 +59,10 @@ public class UserManager implements UserService {
     private void initPasswordRegex() {
         if (this.passwordRegex == null || this.passwordRegex.isEmpty()) {
             this.passwordRegex = DEFAULT_PASSWORD_REGEX;
-    @Value("${app.security.password.regex:^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])(?=.{8,}).*$}")
-    private String passwordRegex;
-
-    public UserManager(UserRepository repo, ModelMapperService mapper, UserBusinessRules rules) {
-        this.repo = repo;
-        this.mapper = mapper;
-        this.rules = rules;
-        // No fallback needed: @Value annotation provides default regex.
+        }
     }
+  
+    
 
     @Override
     public List<GetAllUsersResponse> getAll() {
