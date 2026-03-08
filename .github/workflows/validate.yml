@@ -16,6 +16,12 @@ permissions:
 jobs:
   unit-tests:
     runs-on: ubuntu-latest
+    outputs:
+      tests_run: ${{ steps.publish-summary.outputs.tests_run }}
+      failures: ${{ steps.publish-summary.outputs.failures }}
+      errors: ${{ steps.publish-summary.outputs.errors }}
+      skipped: ${{ steps.publish-summary.outputs.skipped }}
+      duration_seconds: ${{ steps.publish-summary.outputs.duration_seconds }}
 
     steps:
       - name: Checkout repository
@@ -29,11 +35,49 @@ jobs:
           cache: maven
 
       - name: Run unit and integration tests excluding Karate
-        run: ./mvnw --batch-mode -DexcludedGroups=karate test
+        id: run-tests
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          ./mvnw --batch-mode -DexcludedGroups=karate test 2>&1 | tee target/unit-tests.log
+          exit_code=${PIPESTATUS[0]}
+          echo "exit_code=${exit_code}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish unit summary
+        id: publish-summary
+        if: always()
+        run: |
+          python3 .github/scripts/publish_validation_summary.py unit \
+            --reports-dir target/surefire-reports \
+            --summary-file "$GITHUB_STEP_SUMMARY" \
+            --output-file "$GITHUB_OUTPUT"
+
+      - name: Upload unit test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-report
+          path: |
+            target/surefire-reports
+            target/unit-tests.log
+          if-no-files-found: ignore
+
+      - name: Fail if unit tests failed
+        if: always() && steps.run-tests.outputs.exit_code != '0'
+        run: exit 1
 
   karate-contract-tests:
     runs-on: ubuntu-latest
     needs: unit-tests
+    outputs:
+      features_total: ${{ steps.publish-summary.outputs.features_total }}
+      features_passed: ${{ steps.publish-summary.outputs.features_passed }}
+      features_failed: ${{ steps.publish-summary.outputs.features_failed }}
+      scenarios_total: ${{ steps.publish-summary.outputs.scenarios_total }}
+      scenarios_passed: ${{ steps.publish-summary.outputs.scenarios_passed }}
+      scenarios_failed: ${{ steps.publish-summary.outputs.scenarios_failed }}
+      elapsed_seconds: ${{ steps.publish-summary.outputs.elapsed_seconds }}
 
     steps:
       - name: Checkout repository
@@ -47,19 +91,52 @@ jobs:
           cache: maven
 
       - name: Run Karate contract tests
-        run: ./mvnw --batch-mode -Dtest=karate.ApiContractsKarateTest test
+        id: run-tests
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          ./mvnw --batch-mode -Dtest=karate.ApiContractsKarateTest test 2>&1 | tee target/karate-console.log
+          exit_code=${PIPESTATUS[0]}
+          echo "exit_code=${exit_code}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish Karate summary
+        id: publish-summary
+        if: always()
+        run: |
+          python3 .github/scripts/publish_validation_summary.py karate \
+            --summary-json target/karate-reports/karate-summary-json.txt \
+            --summary-file "$GITHUB_STEP_SUMMARY" \
+            --output-file "$GITHUB_OUTPUT"
 
       - name: Upload Karate report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: karate-report
-          path: target/karate-reports
+          path: |
+            target/karate-reports
+            target/karate-console.log
           if-no-files-found: ignore
+
+      - name: Fail if Karate tests failed
+        if: always() && steps.run-tests.outputs.exit_code != '0'
+        run: exit 1
 
   gatling-performance-tests:
     runs-on: ubuntu-latest
     needs: unit-tests
+    outputs:
+      requests_total: ${{ steps.publish-summary.outputs.requests_total }}
+      requests_ok: ${{ steps.publish-summary.outputs.requests_ok }}
+      requests_ko: ${{ steps.publish-summary.outputs.requests_ko }}
+      mean_response_ms: ${{ steps.publish-summary.outputs.mean_response_ms }}
+      p95_ms: ${{ steps.publish-summary.outputs.p95_ms }}
+      p99_ms: ${{ steps.publish-summary.outputs.p99_ms }}
+      throughput_rps: ${{ steps.publish-summary.outputs.throughput_rps }}
+      assertions_total: ${{ steps.publish-summary.outputs.assertions_total }}
+      assertions_failed: ${{ steps.publish-summary.outputs.assertions_failed }}
+      report_path: ${{ steps.publish-summary.outputs.report_path }}
 
     steps:
       - name: Checkout repository
@@ -73,12 +150,88 @@ jobs:
           cache: maven
 
       - name: Run Gatling performance tests
-        run: ./mvnw --batch-mode -Pgatling verify -DskipTests=true
+        id: run-tests
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          ./mvnw --batch-mode -Pgatling verify -DskipTests=true 2>&1 | tee target/gatling-console.log
+          exit_code=${PIPESTATUS[0]}
+          echo "exit_code=${exit_code}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish Gatling summary
+        id: publish-summary
+        if: always()
+        run: |
+          python3 .github/scripts/publish_validation_summary.py gatling \
+            --console-log target/gatling-console.log \
+            --summary-file "$GITHUB_STEP_SUMMARY" \
+            --output-file "$GITHUB_OUTPUT"
 
       - name: Upload Gatling report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: gatling-report
-          path: target/gatling
+          path: |
+            target/gatling
+            target/gatling-console.log
           if-no-files-found: ignore
+
+      - name: Fail if Gatling tests failed
+        if: always() && steps.run-tests.outputs.exit_code != '0'
+        run: exit 1
+
+  validation-summary:
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - unit-tests
+      - karate-contract-tests
+      - gatling-performance-tests
+
+    steps:
+      - name: Publish workflow summary
+        env:
+          UNIT_RESULT: ${{ needs.unit-tests.result }}
+          UNIT_TESTS_RUN: ${{ needs.unit-tests.outputs.tests_run }}
+          UNIT_FAILURES: ${{ needs.unit-tests.outputs.failures }}
+          UNIT_ERRORS: ${{ needs.unit-tests.outputs.errors }}
+          UNIT_SKIPPED: ${{ needs.unit-tests.outputs.skipped }}
+          KARATE_RESULT: ${{ needs.karate-contract-tests.result }}
+          KARATE_FEATURES: ${{ needs.karate-contract-tests.outputs.features_total }}
+          KARATE_SCENARIOS: ${{ needs.karate-contract-tests.outputs.scenarios_total }}
+          KARATE_FAILED: ${{ needs.karate-contract-tests.outputs.scenarios_failed }}
+          GATLING_RESULT: ${{ needs.gatling-performance-tests.result }}
+          GATLING_REQUESTS: ${{ needs.gatling-performance-tests.outputs.requests_total }}
+          GATLING_KO: ${{ needs.gatling-performance-tests.outputs.requests_ko }}
+          GATLING_P95: ${{ needs.gatling-performance-tests.outputs.p95_ms }}
+          GATLING_P99: ${{ needs.gatling-performance-tests.outputs.p99_ms }}
+          GATLING_THROUGHPUT: ${{ needs.gatling-performance-tests.outputs.throughput_rps }}
+          GATLING_ASSERTIONS_FAILED: ${{ needs.gatling-performance-tests.outputs.assertions_failed }}
+        shell: bash
+        run: |
+          status_label() {
+            case "$1" in
+              success) echo "PASS" ;;
+              failure) echo "FAIL" ;;
+              skipped) echo "SKIPPED" ;;
+              cancelled) echo "CANCELLED" ;;
+              *) echo "UNKNOWN" ;;
+            esac
+          }
+
+          {
+            echo "## Validation Summary"
+            echo ""
+            echo "| Stage | Result | Highlights |"
+            echo "| --- | --- | --- |"
+            echo "| Unit and integration | $(status_label "${UNIT_RESULT}") | tests=${UNIT_TESTS_RUN:-n/a}, failures=${UNIT_FAILURES:-n/a}, errors=${UNIT_ERRORS:-n/a}, skipped=${UNIT_SKIPPED:-n/a} |"
+            echo "| Karate contracts | $(status_label "${KARATE_RESULT}") | features=${KARATE_FEATURES:-n/a}, scenarios=${KARATE_SCENARIOS:-n/a}, failed=${KARATE_FAILED:-n/a} |"
+            echo "| Gatling performance | $(status_label "${GATLING_RESULT}") | requests=${GATLING_REQUESTS:-n/a}, ko=${GATLING_KO:-n/a}, p95=${GATLING_P95:-n/a}ms, p99=${GATLING_P99:-n/a}ms, throughput=${GATLING_THROUGHPUT:-n/a}rps, failed assertions=${GATLING_ASSERTIONS_FAILED:-n/a} |"
+            echo ""
+            echo "Artifacts:"
+            echo "- \`unit-test-report\`"
+            echo "- \`karate-report\`"
+            echo "- \`gatling-report\`"
+          } >> "$GITHUB_STEP_SUMMARY"
