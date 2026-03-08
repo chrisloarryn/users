@@ -1,26 +1,26 @@
 # users-service
 
-Servicio Spring Boot 4 para registro, autenticación JWT y administración de usuarios.
+Spring Boot 4 service for JWT registration, authentication, user management, and product management.
 
-## Requisitos
+## Requirements
 
 - JDK 25
-- Docker (opcional para `docker compose` y tests con Testcontainers)
+- Docker (optional for `docker compose` and Testcontainers-backed tests)
 
-Si usas SDKMAN:
+If you use SDKMAN:
 
 ```bash
 sdk env install
 sdk env
 ```
 
-## Ejecutar en local
+## Run locally
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-El perfil por defecto es `local` y apunta a PostgreSQL en `localhost:65432`.
+The default profile is `local` and points to PostgreSQL on `localhost:65432`.
 
 ## Docker Compose
 
@@ -44,7 +44,7 @@ docker compose up --build
 - `GET /api/users/{userId}/products`
 - `GET /api/users/{userId}/products/{productId}`
 
-Swagger queda disponible en local en `http://localhost:8080/swagger-ui/index.html`.
+Swagger is available locally at `http://localhost:8080/swagger-ui/index.html`.
 
 ## Tests
 
@@ -52,35 +52,35 @@ Swagger queda disponible en local en `http://localhost:8080/swagger-ui/index.htm
 ./mvnw test
 ```
 
-## Validaciones
+## Validations
 
-### Unitarias e integración
+### Unit and integration
 
-Para ejecutar la misma primera etapa del workflow de CI:
+To run the same first stage used by the CI workflow:
 
 ```bash
 ./mvnw --batch-mode -DexcludedGroups=karate test
 ```
 
-Esto ejecuta unit tests e integration tests de Spring Boot, excluyendo Karate para separar contratos de API del resto de la suite.
+This runs Spring Boot unit and integration tests while excluding Karate so API contract coverage stays isolated from the rest of the suite.
 
-Cobertura actual validada localmente el 8 de marzo de 2026:
+Current local result validated on March 8, 2026:
 
-- `21` tests ejecutados
+- `59` tests executed
 - `0` failures
 - `0` errors
 
-Cuando Docker esta disponible, los tests de integración usan Testcontainers con PostgreSQL. Si Docker no esta disponible, el perfil `test` cae a H2 para la validación local.
+When Docker is available, integration tests use PostgreSQL through Testcontainers. When Docker is not available, the `test` profile falls back to H2 for local validation.
 
-### Contratos API con Karate
+### API contracts with Karate
 
-Para ejecutar solo la suite de contratos:
+To run only the contract suite:
 
 ```bash
 ./mvnw --batch-mode -Dtest=karate.ApiContractsKarateTest test
 ```
 
-La suite esta organizada en:
+The suite is organized into:
 
 - `src/test/java/karate/contracts/auth`
 - `src/test/java/karate/contracts/users`
@@ -88,76 +88,86 @@ La suite esta organizada en:
 - `src/test/java/karate/helpers`
 - `src/test/java/karate/karate-config.js`
 
-Buenas practicas aplicadas:
+Applied practices:
 
-- features cortos, separados por endpoint o caso
-- datos dinamicos para evitar colisiones entre corridas
-- helpers reusables para alta de usuarios y productos
-- schemas compartidos para validar todos los campos de cada contrato
-- tags por dominio y endpoint, ademas de `@regression`
+- short features, split by endpoint or scenario
+- dynamic test data to avoid collisions across runs
+- reusable helpers for user and product setup
+- shared schemas to validate every field in each contract
+- tags by domain and endpoint, plus `@regression`
 
-Ejemplo para filtrar por tags:
+Example tag filtering:
 
 ```bash
 ./mvnw --batch-mode -Dtest=karate.ApiContractsKarateTest -Dkarate.tags=@products test
 ```
 
-Cobertura actual validada localmente el 8 de marzo de 2026:
+Current local result validated on March 8, 2026:
 
 - `17` features
-- `20` escenarios
-- `0` fallos
+- `20` scenarios
+- `0` failed scenarios
 
-El reporte HTML queda en `target/karate-reports/karate-summary.html`.
+The HTML report is generated at `target/karate-reports/karate-summary.html`.
 
-#### Cuando conviene usar Karate
+#### When Karate is useful
 
-Karate aporta mas valor cuando necesitas validar comportamiento funcional y contratos HTTP de punta a punta sin escribir mucho codigo de plomeria.
+Karate is most valuable when you need end-to-end functional and HTTP contract validation without writing large amounts of plumbing code.
 
-Casos donde conviene tenerlo:
+Recommended use cases:
 
-- cuando el API cambia seguido y quieres detectar regresiones de contrato rapido
-- cuando necesitas validar cada campo del request/response, headers, status codes y errores de negocio
-- cuando varios equipos consumen el servicio y necesitas asegurar compatibilidad del contrato publicado
-- cuando quieres pruebas legibles por desarrolladores, QA o analistas sin bajar al detalle de `MockMvc` o clientes HTTP manuales
-- cuando necesitas segmentar smoke/regression por tags y ejecutar subconjuntos del API
+- when the API changes often and you want fast contract regression feedback
+- when you need field-by-field validation of requests, responses, headers, status codes, and business errors
+- when multiple teams consume the service and published contract compatibility matters
+- when you want readable tests for developers, QA, or analysts without dropping to `MockMvc` or manual HTTP clients
+- when you want to split smoke and regression coverage by tags and run only parts of the API
 
-Beneficios principales de Karate:
+Key Karate benefits:
 
-- valida contratos reales sobre HTTP, no solo capas internas
-- reduce duplicacion gracias a helpers, data dinamica y schemas reutilizables
-- facilita regresion funcional por endpoint, dominio y tag
-- deja reportes HTML faciles de revisar
-- complementa los tests unitarios e integración en vez de reemplazarlos
+- validates real HTTP contracts instead of only internal layers
+- reduces duplication through helpers, dynamic data, and reusable schemas
+- makes endpoint and domain regression coverage easier to maintain
+- produces HTML reports that are easy to inspect
+- complements unit and integration tests instead of replacing them
 
-### Suite completa
+### Full local validation
 
-Para ejecutar toda la validación funcional local:
+To run the full local functional validation:
 
 ```bash
 ./mvnw --batch-mode test
 ```
 
-Resultado validado localmente el 8 de marzo de 2026:
+Local result validated on March 8, 2026:
 
-- `41` tests totales
+- `79` total tests
 - `0` failures
 - `0` errors
 
-### Performance Tests con Gatling
+### Coverage quality gate
+
+To run the same coverage gate used in CI:
+
+```bash
+./mvnw --batch-mode -Pcoverage verify -DexcludedGroups=karate
+```
+
+Current local result validated on March 8, 2026:
+
+- `98.19%` line coverage
+- `217` covered lines
+- `4` missed lines
+- `90%` minimum threshold
+
+### Performance tests with Gatling
 
 ```bash
 ./mvnw --batch-mode -Pgatling verify -DskipTests=true
 ```
 
-El perfil `gatling` levanta la aplicacion con `test,gatling`, ejecuta la simulacion sobre `http://127.0.0.1:8080` y deja el reporte en `target/gatling`.
+The `gatling` profile starts the application with `test,gatling`, runs the simulation against `http://127.0.0.1:8080`, and writes the report to `target/gatling`.
 
-La simulacion esta implementada en:
-
-- `src/gatling/java/com/chrisloarryn/users/performance/UsersApiSimulation.java`
-- `src/gatling/java/com/chrisloarryn/users/performance/GatlingSettings.java`
-
-La simulacion actual cubre:
+The current simulation covers:
 
 - `POST /api/auth/register`
 - `POST /api/auth/login`
@@ -173,82 +183,91 @@ La simulacion actual cubre:
 - `GET /api/users/{userId}/products`
 - `GET /api/users/{userId}/products/{productId}`
 
-Resultado de referencia de la ultima validacion local ejecutada el 8 de marzo de 2026 con `./mvnw --batch-mode -Pgatling verify -DskipTests=true`:
+Reference local result from the last validation executed on March 8, 2026 with `./mvnw --batch-mode -Pgatling verify -DskipTests=true`:
 
-- `715` requests totales
-- `0` requests fallidos
-- `42.06` requests por segundo promedio
-- `1571 ms` en el percentil 99
-- estado final: `fallido` por assertion de performance
+- `715` total requests
+- `0` failed requests
+- `42.06` average requests per second
+- `1571 ms` at the 99th percentile
+- final status: `failed` because of a performance assertion
 
-Detalle del fallo actual:
+Current failure detail:
 
-- la assertion global de Gatling exige percentil 99 `< 1500 ms`
-- la ultima corrida marco `1571 ms`
-- aunque no hubo requests fallidos, Maven termina en `BUILD FAILURE` mientras no se cumpla ese umbral
+- the global Gatling assertion requires p99 `< 1500 ms`
+- the last run reported `1571 ms`
+- even with `0` failed requests, Maven ends with `BUILD FAILURE` until that threshold is met
 
-Ese resultado genero el reporte en `target/gatling/usersapisimulation-20260308075542448`.
+That run generated the report in `target/gatling/usersapisimulation-20260308075542448`.
 
-#### Cuando conviene usar Gatling
+#### When Gatling is useful
 
-Gatling aporta mas valor cuando necesitas validar comportamiento no funcional del servicio bajo carga y con umbrales medibles.
+Gatling is most valuable when you need measurable non-functional validation under load.
 
-Casos donde conviene tenerlo:
+Recommended use cases:
 
-- antes de releases importantes o cambios de arquitectura
-- cuando se agregan endpoints criticos o flujos que encadenan varias operaciones
-- cuando quieres detectar degradacion de latencia despues de cambios en seguridad, persistencia o serializacion
-- cuando necesitas validar throughput, percentiles y estabilidad con una carga repetible
-- cuando quieres convertir expectativas de performance en assertions automatizadas de CI
+- before important releases or architectural changes
+- when adding critical endpoints or flows chaining multiple operations
+- when you want to detect latency degradation after security, persistence, or serialization changes
+- when you need repeatable throughput, percentile, and stability validation
+- when you want to turn performance expectations into automated CI assertions
 
-Beneficios principales de Gatling:
+Key Gatling benefits:
 
-- mide latencia, throughput y percentiles de forma consistente
-- permite detectar regresiones de performance aunque no haya errores funcionales
-- modela flujos de usuario reales y no solo requests aislados
-- genera reportes historicos comparables
-- ayuda a fijar thresholds objetivos para aceptar o rechazar cambios
+- measures latency, throughput, and percentiles consistently
+- detects performance regressions even when there are no functional failures
+- models real user flows instead of only isolated requests
+- produces comparable historical reports
+- helps define objective thresholds to accept or reject changes
 
-#### Karate y Gatling no compiten
+#### Karate and Gatling complement each other
 
-Conviene tener ambos cuando el servicio es relevante para otros consumidores o para negocio:
+Keeping both is worthwhile when the service is important for other consumers or business flows:
 
-- Karate responde si el API sigue funcionando y si el contrato sigue correcto
-- Gatling responde si el API sigue rindiendo bien bajo carga
-- juntos cubren regresion funcional y regresion no funcional en el mismo pipeline
+- Karate answers whether the API still works and whether the contract is still correct
+- Gatling answers whether the API still performs well under load
+- together they cover both functional and non-functional regression in the same delivery pipeline
 
-Puedes ajustar la carga con propiedades Maven, por ejemplo:
+You can tune the load with Maven properties, for example:
 
 ```bash
 ./mvnw -Pgatling verify -Dgatling.users=20 -Dgatling.rampSeconds=15 -Dgatling.holdSeconds=30
 ```
 
-Si `spring-boot:start` choca con otro proceso local, puedes mover el puerto JMX usado para controlar el arranque/parada:
+If `spring-boot:start` conflicts with another local process, you can move the JMX port used to control startup and shutdown:
 
 ```bash
 ./mvnw -Pgatling verify -Dgatling.spring-boot.jmx-port=19101
 ```
 
-## Workflow CI
+## CI workflow
 
-El workflow de GitHub Actions esta en `.github/workflows/validate.yml` y corre en esta secuencia:
+The GitHub Actions workflow lives in `.github/workflows/validate.yml`.
+
+Execution order:
 
 1. `unit-tests`
-2. `karate-contract-tests`
-3. `gatling-performance-tests`
+2. In parallel after `unit-tests` succeeds:
+   - `karate-contract-tests`
+   - `gatling-performance-tests`
+   - `coverage-quality-gate`
 
-El orden real es secuencial al inicio y paralelo despues:
-
-- primero corre `unit-tests`
-- si pasa, arrancan en paralelo `karate-contract-tests` y `gatling-performance-tests`
-
-Comandos usados por CI:
+Commands used by CI:
 
 - `./mvnw --batch-mode -DexcludedGroups=karate test`
 - `./mvnw --batch-mode -Dtest=karate.ApiContractsKarateTest test`
 - `./mvnw --batch-mode -Pgatling verify -DskipTests=true`
+- `./mvnw --batch-mode -Pcoverage verify -DexcludedGroups=karate`
 
-Artefactos publicados por el workflow:
+The workflow summary publishes:
 
+- stage status for unit/integration, Karate, Gatling, and coverage
+- unit test breakdown by area: `service`, `security`, `repository`, `integration`, `error`, and `other`
+- coverage percentage and threshold
+- Gatling latency and assertion highlights
+
+Artifacts published by the workflow:
+
+- `unit-test-report`
 - `karate-report`
 - `gatling-report`
+- `coverage-report`

@@ -1,16 +1,16 @@
 #!/bin/bash
 
-# Verificar si hay cambios pendientes.
+# Check whether there are pending changes.
 if [ -z "$(git status --porcelain)" ]; then
-    echo "No hay cambios para commit. Saliendo..."
+    echo "No changes to commit. Exiting..."
     exit 0
 fi
 
 TAG_MESSAGE=$1
 TICKET_ID=${2:-"users"}
 
-# Añadir todos los cambios al área de staging y hacer un commit.
-echo "Añadiendo cambios y haciendo commit..."
+# Add all changes to the staging area and create a commit.
+echo "Staging changes and creating commit..."
 git add .
 if [ -z "$TAG_MESSAGE" ]; then
 	git commit --allow-empty-message -m '' --no-verify
@@ -19,13 +19,13 @@ else
 	git commit -m "$TAG_MESSAGE" --no-verify
 fi
 
-# Empujar cambios al repositorio remoto.
-echo "Empujando cambios al repositorio remoto..."
+# Push changes to the remote repository.
+echo "Pushing changes to the remote repository..."
 git push
 
 git fetch -p
 
-# Obtener el último número de tag y prepararse para incrementarlo si es necesario.
+# Get the latest tag number and prepare to increment it if needed.
 LAST_TAG=$(git tag -l "snapshot-$TICKET_ID-*" | sort -Vr | head -n 1)
 if [[ $LAST_TAG =~ ([0-9]+)$ ]]; then
     TAG_NUMBER=$((${BASH_REMATCH[1]} + 1))
@@ -33,7 +33,7 @@ else
     TAG_NUMBER=1
 fi
 
-# Incrementar el número del tag automáticamente si el tag ya existe.
+# Increment the tag number automatically if the tag already exists.
 TAG_EXISTS=1
 while [ $TAG_EXISTS -ne 0 ]; do
     TAG="snapshot-$TICKET_ID-$(printf "%02d" $TAG_NUMBER)"
@@ -45,11 +45,11 @@ while [ $TAG_EXISTS -ne 0 ]; do
 done
 
 
-echo "Trabajando en el último commit..."
+echo "Checking out the latest commit..."
 git checkout HEAD
 
-echo "Creando el tag $TAG..."
+echo "Creating tag $TAG..."
 git tag -a "$TAG" -m "$TAG_MESSAGE"
 
-echo "Empujando el tag al repositorio remoto..."
+echo "Pushing tag to the remote repository..."
 git push origin "$TAG"
