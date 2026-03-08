@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.2</version>
+        <version>4.0.3</version>
         <relativePath/>
     </parent>
 
@@ -19,6 +19,7 @@
 
     <properties>
         <java.version>25</java.version>
+        <karate.version>1.5.2</karate.version>
         <gatling.plugin.version>4.21.0</gatling.plugin.version>
         <gatling.version>3.15.0</gatling.version>
         <gatling.spring-boot.jmx-port>19001</gatling.spring-boot.jmx-port>
@@ -91,6 +92,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>io.karatelabs</groupId>
+            <artifactId>karate-junit5</artifactId>
+            <version>${karate.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${testcontainers.version}</version>
@@ -117,6 +124,25 @@
     </dependencies>
 
     <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+            </testResource>
+            <testResource>
+                <directory>src/test/java</directory>
+                <includes>
+                    <include>karate/**/*.feature</include>
+                    <include>karate/**/*.json</include>
+                </includes>
+            </testResource>
+            <testResource>
+                <directory>src/test/java/karate</directory>
+                <targetPath>.</targetPath>
+                <includes>
+                    <include>karate-config.js</include>
+                </includes>
+            </testResource>
+        </testResources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

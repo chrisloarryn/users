@@ -51,7 +51,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponse create(CreateProductRequest request) {
         User actor = currentUserService.getCurrentUser();
         Product product = new Product(normalizeName(request.name()), request.price(), actor);
-        return productMapper.toResponse(productRepository.save(product));
+        return productMapper.toResponse(productRepository.saveAndFlush(product));
     }
 
     @Override
@@ -60,7 +60,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = getProduct(id);
         User actor = currentUserService.getCurrentUser();
         product.updateDetails(normalizeName(request.name()), request.price(), actor);
-        return productMapper.toResponse(productRepository.save(product));
+        return productMapper.toResponse(productRepository.saveAndFlush(product));
     }
 
     @Override
