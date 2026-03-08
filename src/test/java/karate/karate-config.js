@@ -64,6 +64,10 @@ function fn() {
     return prefix + '-' + UUID.randomUUID();
   };
 
+  config.repeat = function(value, count) {
+    return new Array(count + 1).join(value);
+  };
+
   config.basePhones = function() {
     return [
       {
