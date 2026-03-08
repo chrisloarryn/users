@@ -36,6 +36,13 @@ docker compose up --build
 - `GET /api/users/{id}`
 - `PUT /api/users/{id}`
 - `DELETE /api/users/{id}`
+- `GET /api/products`
+- `GET /api/products/{id}`
+- `POST /api/products`
+- `PUT /api/products/{id}`
+- `DELETE /api/products/{id}`
+- `GET /api/users/{userId}/products`
+- `GET /api/users/{userId}/products/{productId}`
 
 Swagger queda disponible en local en `http://localhost:8080/swagger-ui/index.html`.
 
@@ -43,4 +50,18 @@ Swagger queda disponible en local en `http://localhost:8080/swagger-ui/index.htm
 
 ```bash
 ./mvnw test
+```
+
+## Performance Tests
+
+```bash
+./mvnw -Pgatling verify
+```
+
+El perfil `gatling` levanta la aplicacion con `test,gatling`, ejecuta la simulacion sobre `http://127.0.0.1:8080` y deja el reporte en `target/gatling`.
+
+Puedes ajustar la carga con propiedades Maven, por ejemplo:
+
+```bash
+./mvnw -Pgatling verify -Dgatling.users=20 -Dgatling.rampSeconds=15 -Dgatling.holdSeconds=30
 ```

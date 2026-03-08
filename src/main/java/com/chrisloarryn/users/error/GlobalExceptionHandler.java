@@ -17,7 +17,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     ProblemDetail handleNotFound(NotFoundException exception) {
-        return problem(HttpStatus.NOT_FOUND, "User not found", List.of(exception.getMessage()));
+        return problem(HttpStatus.NOT_FOUND, "Not Found", List.of(exception.getMessage()));
     }
 
     @ExceptionHandler(ConflictException.class)

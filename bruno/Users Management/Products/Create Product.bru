@@ -1,0 +1,35 @@
+meta {
+  name: "Create Product"
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/products
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt}}
+}
+
+body:json {
+  {
+    "name": "Sample Product",
+    "price": 12.34
+  }
+}
+
+script:post-response {
+  const responseStatus = res.getStatus();
+  const responseBody = res.getBody();
+
+  if (responseStatus === 201 && responseBody?.id) {
+    bru.setEnvVar("productId", responseBody.id);
+  }
+}
+
+settings {
+  encodeUrl: true
+}

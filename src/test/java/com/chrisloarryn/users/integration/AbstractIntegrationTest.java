@@ -49,6 +49,7 @@ abstract class AbstractIntegrationTest {
 
     @BeforeEach
     void cleanDatabase() {
+        jdbcTemplate.execute("DELETE FROM products");
         jdbcTemplate.execute("DELETE FROM phones");
         jdbcTemplate.execute("DELETE FROM users");
     }

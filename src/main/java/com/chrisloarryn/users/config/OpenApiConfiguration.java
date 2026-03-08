@@ -17,7 +17,7 @@ public class OpenApiConfiguration {
         return new OpenAPI()
                 .info(new Info()
                         .title("Users Service API")
-                        .description("JWT-based user registration and management service.")
+                        .description("JWT-based user, authentication and product management service.")
                         .version("v1")
                         .contact(new Contact()
                                 .name("Users Service")

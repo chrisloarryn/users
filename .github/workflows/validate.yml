@@ -25,5 +25,16 @@ jobs:
           java-version: "25"
           cache: maven
 
-      - name: Build and test
-        run: ./mvnw --batch-mode verify
+      - name: Run unit tests
+        run: ./mvnw --batch-mode test
+
+      - name: Run Gatling performance tests
+        run: ./mvnw --batch-mode -Pgatling verify -DskipTests=true
+
+      - name: Upload Gatling report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gatling-report
+          path: target/gatling
+          if-no-files-found: ignore

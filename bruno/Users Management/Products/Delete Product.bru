@@ -1,0 +1,27 @@
+meta {
+  name: "Delete Product"
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/products/{{productId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt}}
+}
+
+script:post-response {
+  const responseStatus = res.getStatus();
+
+  if (responseStatus === 204) {
+    bru.setEnvVar("productId", "");
+  }
+}
+
+settings {
+  encodeUrl: true
+}

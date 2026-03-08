@@ -1,0 +1,26 @@
+meta {
+  name: "Update Product"
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/products/{{productId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt}}
+}
+
+body:json {
+  {
+    "name": "Updated Product",
+    "price": 99.99
+  }
+}
+
+settings {
+  encodeUrl: true
+}

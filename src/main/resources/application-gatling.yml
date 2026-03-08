@@ -1,0 +1,20 @@
+app:
+  jwt:
+    secret: LhdExM1rM6oA9B0fcT4he95WBMxn/LhLgw7LCb/MuPk=
+    expiration: PT30M
+
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:usersdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+  main:
+    banner-mode: off
+
+logging:
+  level:
+    root: WARN
+    org.springframework: WARN
