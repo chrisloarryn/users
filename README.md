@@ -104,8 +104,8 @@ Example tag filtering:
 
 Current local result validated on March 8, 2026:
 
-- `17` features
-- `20` scenarios
+- `18` features
+- `101` scenarios
 - `0` failed scenarios
 
 The HTML report is generated at `target/karate-reports/karate-summary.html`.
@@ -140,7 +140,7 @@ To run the full local functional validation:
 
 Local result validated on March 8, 2026:
 
-- `79` total tests
+- `160` total tests
 - `0` failures
 - `0` errors
 
