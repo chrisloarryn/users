@@ -65,3 +65,9 @@ Puedes ajustar la carga con propiedades Maven, por ejemplo:
 ```bash
 ./mvnw -Pgatling verify -Dgatling.users=20 -Dgatling.rampSeconds=15 -Dgatling.holdSeconds=30
 ```
+
+Si `spring-boot:start` choca con otro proceso local, puedes mover el puerto JMX usado para controlar el arranque/parada:
+
+```bash
+./mvnw -Pgatling verify -Dgatling.spring-boot.jmx-port=19101
+```

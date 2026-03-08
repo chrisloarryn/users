@@ -21,6 +21,7 @@
         <java.version>25</java.version>
         <gatling.plugin.version>4.21.0</gatling.plugin.version>
         <gatling.version>3.15.0</gatling.version>
+        <gatling.spring-boot.jmx-port>19001</gatling.spring-boot.jmx-port>
         <springdoc.version>2.8.15</springdoc.version>
         <testcontainers.version>1.21.4</testcontainers.version>
     </properties>
@@ -97,6 +98,18 @@
             <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.gatling</groupId>
+            <artifactId>gatling-core-java</artifactId>
+            <version>${gatling.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.gatling</groupId>
+            <artifactId>gatling-http-java</artifactId>
+            <version>${gatling.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -154,6 +167,7 @@
                                     <arguments>
                                         <argument>--spring.profiles.active=test,gatling</argument>
                                     </arguments>
+                                    <jmxPort>${gatling.spring-boot.jmx-port}</jmxPort>
                                     <maxAttempts>60</maxAttempts>
                                     <useTestClasspath>true</useTestClasspath>
                                     <wait>1000</wait>
@@ -165,6 +179,9 @@
                                 <goals>
                                     <goal>stop</goal>
                                 </goals>
+                                <configuration>
+                                    <jmxPort>${gatling.spring-boot.jmx-port}</jmxPort>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -172,6 +189,9 @@
                         <groupId>io.gatling</groupId>
                         <artifactId>gatling-maven-plugin</artifactId>
                         <version>${gatling.plugin.version}</version>
+                        <configuration>
+                            <simulationClass>com.chrisloarryn.users.performance.UsersApiSimulation</simulationClass>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>gatling-integration-test</id>

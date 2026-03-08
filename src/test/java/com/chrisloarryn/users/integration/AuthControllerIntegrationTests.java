@@ -74,6 +74,24 @@ class AuthControllerIntegrationTests extends AbstractIntegrationTest {
                 .andExpect(status().isConflict());
     }
 
+    @Test
+    void weakPasswordReturnsManagedBusinessError() throws Exception {
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name":"Jane Doe",
+                                  "email":"weak@example.com",
+                                  "password":"weak",
+                                  "phones":[{"number":"123456789","cityCode":"1","countryCode":"56"}]
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title", equalTo("Business Rule Violation")))
+                .andExpect(jsonPath("$.detail", equalTo(
+                        "Password must contain upper and lower case letters, a number, a special character and at least 8 characters")));
+    }
+
     private void register(String email) throws Exception {
         mockMvc.perform(post("/api/auth/register")
                 .contentType(APPLICATION_JSON)

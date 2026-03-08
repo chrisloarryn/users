@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Locale;
 
 import com.chrisloarryn.users.domain.User;
+import com.chrisloarryn.users.error.BusinessValidationException;
 import com.chrisloarryn.users.error.ConflictException;
 import com.chrisloarryn.users.error.InvalidCredentialsException;
 import com.chrisloarryn.users.repository.UserRepository;
@@ -77,7 +78,7 @@ public class AuthServiceImpl implements AuthService {
 
     private void validatePassword(String password) {
         if (!passwordPolicyValidator.isValid(password)) {
-            throw new IllegalArgumentException(
+            throw new BusinessValidationException(
                     "Password must contain upper and lower case letters, a number, a special character and at least 8 characters");
         }
     }

@@ -5,6 +5,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 import com.chrisloarryn.users.domain.User;
+import com.chrisloarryn.users.error.BusinessValidationException;
 import com.chrisloarryn.users.error.ConflictException;
 import com.chrisloarryn.users.error.NotFoundException;
 import com.chrisloarryn.users.repository.UserRepository;
@@ -65,7 +66,7 @@ public class UserServiceImpl implements UserService {
         if (request.password() != null) {
             String candidate = request.password().trim();
             if (candidate.isEmpty() || !passwordPolicyValidator.isValid(candidate)) {
-                throw new IllegalArgumentException(
+                throw new BusinessValidationException(
                         "Password must contain upper and lower case letters, a number, a special character and at least 8 characters");
             }
             user.updatePasswordHash(passwordEncoder.encode(candidate));
