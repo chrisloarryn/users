@@ -23,6 +23,8 @@
         <gatling.plugin.version>4.21.0</gatling.plugin.version>
         <gatling.version>3.15.0</gatling.version>
         <gatling.spring-boot.jmx-port>19001</gatling.spring-boot.jmx-port>
+        <jacoco.version>0.8.13</jacoco.version>
+        <coverage.minimum.line.ratio>0.90</coverage.minimum.line.ratio>
         <springdoc.version>2.8.15</springdoc.version>
         <testcontainers.version>1.21.4</testcontainers.version>
     </properties>
@@ -171,6 +173,80 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>coverage</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco.version}</version>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                                <configuration>
+                                    <excludes>
+                                        <exclude>**/UsersApplication*</exclude>
+                                        <exclude>**/config/**</exclude>
+                                        <exclude>**/domain/**</exclude>
+                                        <exclude>**/repository/**</exclude>
+                                        <exclude>**/service/*</exclude>
+                                        <exclude>**/web/dto/**</exclude>
+                                        <exclude>**/error/NotFoundException*</exclude>
+                                        <exclude>**/error/ConflictException*</exclude>
+                                        <exclude>**/error/BusinessValidationException*</exclude>
+                                        <exclude>**/error/InvalidCredentialsException*</exclude>
+                                    </excludes>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>check</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <rule>
+                                            <element>BUNDLE</element>
+                                            <excludes>
+                                                <exclude>**/UsersApplication*</exclude>
+                                                <exclude>**/config/**</exclude>
+                                                <exclude>**/domain/**</exclude>
+                                                <exclude>**/repository/**</exclude>
+                                                <exclude>**/service/*</exclude>
+                                                <exclude>**/web/dto/**</exclude>
+                                                <exclude>**/error/NotFoundException*</exclude>
+                                                <exclude>**/error/ConflictException*</exclude>
+                                                <exclude>**/error/BusinessValidationException*</exclude>
+                                                <exclude>**/error/InvalidCredentialsException*</exclude>
+                                            </excludes>
+                                            <limits>
+                                                <limit>
+                                                    <counter>LINE</counter>
+                                                    <value>COVEREDRATIO</value>
+                                                    <minimum>${coverage.minimum.line.ratio}</minimum>
+                                                </limit>
+                                            </limits>
+                                        </rule>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>gatling</id>
             <dependencies>

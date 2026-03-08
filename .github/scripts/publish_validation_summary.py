@@ -257,6 +257,64 @@ def parse_gatling_console(args: argparse.Namespace) -> int:
     return 0
 
 
+def parse_coverage_report(args: argparse.Namespace) -> int:
+    report_path = Path(args.report_xml)
+    threshold = float(args.minimum_ratio) * 100.0
+
+    if not report_path.exists():
+        write_output(args.output_file, "line_coverage_pct", "0.00")
+        write_output(args.output_file, "covered_lines", "0")
+        write_output(args.output_file, "missed_lines", "0")
+        write_output(args.output_file, "coverage_threshold_pct", f"{threshold:.2f}")
+        append_summary(
+            args.summary_file,
+            "\n".join(
+                [
+                    "## Coverage Quality Gate",
+                    "",
+                    "No JaCoCo report was generated.",
+                    "",
+                ]
+            ),
+        )
+        return 0
+
+    root = ET.parse(report_path).getroot()
+    line_counter = next((counter for counter in root.findall("counter") if counter.attrib.get("type") == "LINE"), None)
+    if line_counter is None:
+        covered = 0
+        missed = 0
+    else:
+        covered = int(line_counter.attrib.get("covered", "0"))
+        missed = int(line_counter.attrib.get("missed", "0"))
+
+    total = covered + missed
+    coverage_pct = (covered / total * 100.0) if total else 0.0
+
+    write_output(args.output_file, "line_coverage_pct", f"{coverage_pct:.2f}")
+    write_output(args.output_file, "covered_lines", str(covered))
+    write_output(args.output_file, "missed_lines", str(missed))
+    write_output(args.output_file, "coverage_threshold_pct", f"{threshold:.2f}")
+
+    append_summary(
+        args.summary_file,
+        "\n".join(
+            [
+                "## Coverage Quality Gate",
+                "",
+                "| Metric | Value |",
+                "| --- | --- |",
+                f"| Line coverage | {coverage_pct:.2f}% |",
+                f"| Threshold | {threshold:.2f}% |",
+                f"| Covered lines | {covered} |",
+                f"| Missed lines | {missed} |",
+                "",
+            ]
+        ),
+    )
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Publish validation summaries for GitHub Actions.")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -278,6 +336,13 @@ def build_parser() -> argparse.ArgumentParser:
     gatling.add_argument("--summary-file")
     gatling.add_argument("--output-file")
     gatling.set_defaults(handler=parse_gatling_console)
+
+    coverage = subparsers.add_parser("coverage")
+    coverage.add_argument("--report-xml", required=True)
+    coverage.add_argument("--minimum-ratio", required=True)
+    coverage.add_argument("--summary-file")
+    coverage.add_argument("--output-file")
+    coverage.set_defaults(handler=parse_coverage_report)
 
     return parser
 
