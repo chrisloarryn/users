@@ -1,84 +1,46 @@
-# User Management Backend
+# users-service
 
-## Description
+Servicio Spring Boot 4 para registro, autenticación JWT y administración de usuarios.
 
-Spring Boot backend for Manage Users Accounts application.
+## Requisitos
 
+- JDK 25
+- Docker (opcional para `docker compose` y tests con Testcontainers)
 
----
-
-## NOTES:
-
-- The database scripts will be executed automatically when you start the docker-compose command.
-- For local execution (instead of dockerized environment) is necessary to have a PostgreSQL database running on "localhost:65432" or any other port you want to use.
-
-- The application is running on port 8080.
-
-### The application is using the following technologies:
-  - Spring Boot
-  - Spring Data JPA
-  - Spring Web
-  - Spring Boot DevTools
-  - Spring Boot Actuator
-  - PostgreSQL
-  - Docker
-  - Karate
----
-
-## Installation
+Si usas SDKMAN:
 
 ```bash
-mvn clean install
+sdk env install
+sdk env
 ```
----
-## Usage
+
+## Ejecutar en local
 
 ```bash
-mvn spring-boot:run
+./mvnw spring-boot:run
 ```
----
-## Docker execution
 
-It provides a PostgreSQL database and the service. To run it, execute: 
+El perfil por defecto es `local` y apunta a PostgreSQL en `localhost:65432`.
+
+## Docker Compose
 
 ```bash
-docker-compose up
+docker compose up --build
 ```
 
----
-## Swagger (not working yet)
+## Endpoints
 
-Swagger is available at: http://localhost:8080/swagger-ui/index.htmlhttp://localhost:8080/swagger-ui/index.html
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/users`
+- `GET /api/users/{id}`
+- `PUT /api/users/{id}`
+- `DELETE /api/users/{id}`
 
----
+Swagger queda disponible en local en `http://localhost:8080/swagger-ui/index.html`.
 
-## Executing karate tests
+## Tests
 
 ```bash
-mvn clean test -Dkarate.env="local" -Dkarate.options="--tags @users" -Ddriver=karate > log.log -X
+./mvnw test
 ```
----
-
-## Configuración del regex de contraseña (password)
-
-La aplicación lee el patrón desde la propiedad `app.security.password.regex`. En variables de ambiente (ENV) esto se mapea como `APP_SECURITY_PASSWORD_REGEX`.
-
-Ejemplos de uso:
-- Linux/macOS (bash/zsh):
-  - export APP_SECURITY_PASSWORD_REGEX='^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$'
-  - mvn spring-boot:run
-- Windows PowerShell:
-  - $Env:APP_SECURITY_PASSWORD_REGEX = '^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$'
-  - mvn spring-boot:run
-- Maven (pasando la propiedad directamente):
-  - mvn spring-boot:run -Dapp.security.password.regex="^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*]).{8,}$"
-- Docker (run):
-  - docker run -e APP_SECURITY_PASSWORD_REGEX='^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$' -p 8080:8080 imagen
-- Docker Compose: ya fue agregado al archivo `docker-compose.yml` bajo `services.api.environment` como `APP_SECURITY_PASSWORD_REGEX`.
-- Kubernetes: agregar una variable de entorno `APP_SECURITY_PASSWORD_REGEX` en el Deployment o definirla en un ConfigMap y referenciarlo.
-
-Notas de escape:
-- Prefiera comillas simples en shell/YAML para evitar escapar excesivo.
-- En valores pasados con `-D` (Maven), use comillas dobles y escape de backslash (`\\d`).
-- También puede definir el valor en `application.properties` como:
-  - app.security.password.regex=^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,}).*$

@@ -56,17 +56,7 @@ mingw=false
 case "$(uname)" in
   CYGWIN*) cygwin=true ;;
   MINGW*) mingw=true;;
-  Darwin*) darwin=true
-    # Use /usr/libexec/java_home if available, otherwise fall back to /Library/Java/Home
-    # See https://developer.apple.com/library/mac/qa/qa1170/_index.html
-    if [ -z "$JAVA_HOME" ]; then
-      if [ -x "/usr/libexec/java_home" ]; then
-        JAVA_HOME="$(/usr/libexec/java_home)"; export JAVA_HOME
-      else
-        JAVA_HOME="/Library/Java/Home"; export JAVA_HOME
-      fi
-    fi
-    ;;
+  Darwin*) darwin=true ;;
 esac
 
 if [ -z "$JAVA_HOME" ] ; then
@@ -109,6 +99,20 @@ if [ -z "$JAVA_HOME" ]; then
   fi
 fi
 
+if [ -n "$JAVA_HOME" ] && [ ! -x "$JAVA_HOME/bin/java" ] ; then
+  JAVA_HOME=""
+fi
+
+if $darwin ; then
+  if [ -z "$JAVA_HOME" ] && [ -x "/usr/libexec/java_home" ]; then
+    JAVA_HOME="$(/usr/libexec/java_home)"
+    export JAVA_HOME
+  elif [ -z "$JAVA_HOME" ]; then
+    JAVA_HOME="/Library/Java/Home"
+    export JAVA_HOME
+  fi
+fi
+
 if [ -z "$JAVACMD" ] ; then
   if [ -n "$JAVA_HOME"  ] ; then
     if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
@@ -120,6 +124,10 @@ if [ -z "$JAVACMD" ] ; then
   else
     JAVACMD="$(\unset -f command 2>/dev/null; \command -v java)"
   fi
+fi
+
+if [ ! -x "$JAVACMD" ] && command -v java > /dev/null 2>&1 ; then
+  JAVACMD="$(command -v java)"
 fi
 
 if [ ! -x "$JAVACMD" ] ; then

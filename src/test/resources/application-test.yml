@@ -1,0 +1,10 @@
+app:
+  jwt:
+    secret: LhdExM1rM6oA9B0fcT4he95WBMxn/LhLgw7LCb/MuPk=
+    expiration: PT30M
+spring:
+  datasource:
+    url: jdbc:h2:mem:usersdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:

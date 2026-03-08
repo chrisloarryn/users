@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:65432/postgres}
+    username: ${DATASOURCE_USERNAME:postgres}
+    password: ${DATASOURCE_PASSWORD:postgres}
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,env,configprops
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:AuYTA93cymmW0Rr6oqzVcK/vYEnZ5qN4Wy26+IEsdjc=}

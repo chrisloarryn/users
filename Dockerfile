@@ -1,24 +1,16 @@
-# Etapa de construcción
-FROM maven:3-eclipse-temurin-24-alpine AS build
-WORKDIR /app
-
-COPY src ./src
+FROM maven:3.9.11-eclipse-temurin-25 AS build
+WORKDIR /workspace
 
 COPY .mvn/ .mvn
-COPY mvnw pom.xml ./
-RUN mvn clean package -B
+COPY mvnw mvnw
+COPY pom.xml pom.xml
+COPY src src
+RUN chmod +x mvnw
+RUN ./mvnw --batch-mode -DskipTests package
 
-# log the output of the build
-RUN ls -la /app/target
-
-# Etapa de ejecución
-FROM openjdk:18-slim
+FROM eclipse-temurin:25-jre
 WORKDIR /app
-COPY --from=build /app/target/*.jar users.jar
+COPY --from=build /workspace/target/users-service-0.1.0-SNAPSHOT.jar app.jar
 
-# Exponer el puerto 8080
 EXPOSE 8080
-RUN ls -la /app
-
-# Ejecutar la aplicación
-ENTRYPOINT ["java", "-jar", "users.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

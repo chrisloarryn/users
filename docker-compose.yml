@@ -1,26 +1,32 @@
-version: '3.9'
 services:
   postgres:
-    image: postgres:12.2
-    restart: always
+    image: postgres:17-alpine
+    restart: unless-stopped
     environment:
+      POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
     ports:
       - "65432:5432"
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
-      - ./BD:/docker-entrypoint-initdb.d
+      - postgres-data:/var/lib/postgresql/data
+
   api:
     build:
       context: .
       dockerfile: Dockerfile
-    restart: always
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres
+      DATASOURCE_USERNAME: postgres
+      DATASOURCE_PASSWORD: postgres
+      JWT_SECRET: AuYTA93cymmW0Rr6oqzVcK/vYEnZ5qN4Wy26+IEsdjc=
+      APP_SECURITY_PASSWORD_REGEX: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$
     ports:
       - "8080:8080"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      APP_SECURITY_PASSWORD_REGEX: '^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$'
+
+volumes:
+  postgres-data:
