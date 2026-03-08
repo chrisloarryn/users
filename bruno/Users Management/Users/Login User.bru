@@ -1,0 +1,28 @@
+meta {
+  name: "Login User"
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/users/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "bruno.user@gmail.com",
+    "password": "Hunter22@@"
+  }
+}
+
+script:post-response {
+  if (res.status === 200 && res.body && res.body.jwt) {
+    bru.setEnvVar("jwt", res.body.jwt, { persist: false });
+  }
+}
+
+settings {
+  encodeUrl: true
+}

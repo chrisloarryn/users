@@ -3,6 +3,8 @@ package accounttransaction.api.controllers.concretes;
 import accounttransaction.api.controllers.abstracts.UserController;
 import accounttransaction.business.abstracts.UserService;
 import accounttransaction.business.dto.responses.create.LoginUserResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 
@@ -23,6 +25,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
+@Tag(name = "Users")
 public class UserControllerImpl implements UserController {
     @Autowired
     private UserService service;
@@ -52,11 +55,13 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
+    @Operation(summary = "Register User")
     public CreateUserResponse add(@Valid @RequestBody CreateUserRequest request) {
         return service.add(request);
     }
 
     @Override
+    @Operation(summary = "Login User")
     public LoginUserResponse login(@Valid @RequestBody LoginUserRequest request) {
         LoginUserResponse resp = service.login(request);
         if (jwtTokenProvider != null) {

@@ -4,10 +4,22 @@ meta {
   seq: 5
 }
 
-request {
-  method: DELETE
-  url: "{{baseUrl}}/api/products/{{productId}}"
-  headers {
-    Authorization: Bearer {{jwt}}
+delete {
+  url: {{baseUrl}}/api/products/{{productId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{jwt}}
+}
+
+script:post-response {
+  if (res.status === 204) {
+    bru.setEnvVar("productId", "", { persist: false });
   }
+}
+
+settings {
+  encodeUrl: true
 }

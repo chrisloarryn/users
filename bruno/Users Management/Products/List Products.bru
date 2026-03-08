@@ -1,5 +1,5 @@
 meta {
-  name: all
+  name: "List Products"
   type: http
   seq: 1
 }
@@ -7,11 +7,9 @@ meta {
 get {
   url: {{baseUrl}}/api/products
   body: none
-  auth: inherit
+  auth: none
 }
-headers {
-    Authorization: "Bearer {{jwt}}"
-  }
+
 settings {
   encodeUrl: true
 }

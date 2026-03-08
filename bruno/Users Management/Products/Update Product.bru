@@ -4,17 +4,23 @@ meta {
   seq: 4
 }
 
-request {
-  method: PUT
-  url: "{{baseUrl}}/api/products/{{productId}}"
-  headers {
-    Authorization: Bearer {{jwt}}
-    Content-Type: application/json
-  }
-  body: json("""
+put {
+  url: {{baseUrl}}/api/products/{{productId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{jwt}}
+}
+
+body:json {
   {
     "name": "Updated Name",
     "price": 99.99
   }
-  """)
+}
+
+settings {
+  encodeUrl: true
 }
