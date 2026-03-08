@@ -1,0 +1,41 @@
+meta {
+  name: "Login User"
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "{{userEmail}}",
+    "password": "{{userPassword}}"
+  }
+}
+
+script:post-response {
+  const responseStatus = res.getStatus();
+  const responseBody = res.getBody();
+
+  if (responseStatus === 200 && responseBody) {
+    if (responseBody.accessToken) {
+      bru.setEnvVar("jwt", responseBody.accessToken);
+    }
+
+    if (responseBody.user?.id) {
+      bru.setEnvVar("userId", responseBody.user.id);
+    }
+
+    if (responseBody.user?.email) {
+      bru.setEnvVar("userEmail", responseBody.user.email);
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+}

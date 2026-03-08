@@ -1,0 +1,44 @@
+meta {
+  name: "Update User"
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseUrl}}/api/users/{{userId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt}}
+}
+
+body:json {
+  {
+    "name": "Bruno User Updated",
+    "email": "{{updatedUserEmail}}",
+    "password": "{{updatedUserPassword}}",
+    "phones": [
+      {
+        "number": "999999999",
+        "cityCode": "2",
+        "countryCode": "56"
+      }
+    ]
+  }
+}
+
+script:post-response {
+  const responseStatus = res.getStatus();
+  const responseBody = res.getBody();
+
+  if (responseStatus === 200 && responseBody?.email) {
+    bru.setEnvVar("userEmail", responseBody.email);
+    bru.setEnvVar("userPassword", "NewStrong1!");
+  }
+}
+
+settings {
+  encodeUrl: true
+}
