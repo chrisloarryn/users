@@ -79,7 +79,66 @@ public class UsersApiSimulation extends Simulation {
                             """))
                     .asJson()
                     .check(status().is(200))
-                    .check(jsonPath("$.email").isEL("#{updatedEmail}")));
+                    .check(jsonPath("$.email").isEL("#{updatedEmail}")))
+            .pause(USER_THINK_TIME)
+            .exec(http("create_product")
+                    .post("/api/products")
+                    .header("Authorization", "Bearer #{accessToken}")
+                    .body(StringBody("""
+                            {
+                              "name":"#{productName}",
+                              "price":#{productPrice}
+                            }
+                            """))
+                    .asJson()
+                    .check(status().is(201))
+                    .check(jsonPath("$.id").saveAs("productId"))
+                    .check(jsonPath("$.createdByUserId").isEL("#{userId}"))
+                    .check(jsonPath("$.updatedByUserId").isEL("#{userId}")))
+            .exec(http("list_products")
+                    .get("/api/products")
+                    .header("Authorization", "Bearer #{accessToken}")
+                    .check(status().is(200)))
+            .exec(http("get_product_by_id")
+                    .get("/api/products/#{productId}")
+                    .header("Authorization", "Bearer #{accessToken}")
+                    .check(status().is(200))
+                    .check(jsonPath("$.id").isEL("#{productId}"))
+                    .check(jsonPath("$.createdByUserId").isEL("#{userId}")))
+            .exec(http("get_products_by_user")
+                    .get("/api/users/#{userId}/products")
+                    .header("Authorization", "Bearer #{accessToken}")
+                    .check(status().is(200)))
+            .exec(http("get_user_product_by_id")
+                    .get("/api/users/#{userId}/products/#{productId}")
+                    .header("Authorization", "Bearer #{accessToken}")
+                    .check(status().is(200))
+                    .check(jsonPath("$.id").isEL("#{productId}"))
+                    .check(jsonPath("$.createdByUserId").isEL("#{userId}")))
+            .pause(USER_THINK_TIME)
+            .exec(http("update_product")
+                    .put("/api/products/#{productId}")
+                    .header("Authorization", "Bearer #{accessToken}")
+                    .body(StringBody("""
+                            {
+                              "name":"#{updatedProductName}",
+                              "price":#{updatedProductPrice}
+                            }
+                            """))
+                    .asJson()
+                    .check(status().is(200))
+                    .check(jsonPath("$.id").isEL("#{productId}"))
+                    .check(jsonPath("$.name").isEL("#{updatedProductName}"))
+                    .check(jsonPath("$.updatedByUserId").isEL("#{userId}")))
+            .pause(USER_THINK_TIME)
+            .exec(http("delete_product")
+                    .delete("/api/products/#{productId}")
+                    .header("Authorization", "Bearer #{accessToken}")
+                    .check(status().is(204)))
+            .exec(http("delete_user")
+                    .delete("/api/users/#{userId}")
+                    .header("Authorization", "Bearer #{accessToken}")
+                    .check(status().is(204)));
 
     {
         setUp(usersFlow.injectOpen(
@@ -100,6 +159,10 @@ public class UsersApiSimulation extends Simulation {
                 .set("password", "StrongPass1!")
                 .set("updatedName", "Updated User " + uniqueSuffix)
                 .set("updatedEmail", "updated-" + uniqueSuffix + "@example.com")
-                .set("updatedPassword", "NewStrong1!");
+                .set("updatedPassword", "NewStrong1!")
+                .set("productName", "Gatling Product " + uniqueSuffix)
+                .set("productPrice", "12.34")
+                .set("updatedProductName", "Updated Product " + uniqueSuffix)
+                .set("updatedProductPrice", "99.99");
     }
 }
