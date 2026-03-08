@@ -1,0 +1,12 @@
+[
+  "AuthResponse",
+  "CreateProductRequest",
+  "LoginRequest",
+  "PhoneRequest",
+  "PhoneResponse",
+  "ProductResponse",
+  "RegisterUserRequest",
+  "UpdateProductRequest",
+  "UpdateUserRequest",
+  "UserResponse"
+]

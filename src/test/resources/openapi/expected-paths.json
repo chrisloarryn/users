@@ -1,0 +1,10 @@
+[
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/products",
+  "/api/products/{id}",
+  "/api/users",
+  "/api/users/{id}",
+  "/api/users/{userId}/products",
+  "/api/users/{userId}/products/{productId}"
+]

@@ -46,4 +46,12 @@ class CurrentUserServiceTests {
     void rejectsMissingAuthentication() {
         assertThrows(InvalidCredentialsException.class, currentUserService::getCurrentUser);
     }
+
+    @Test
+    void rejectsAuthenticatedPrincipalsThatAreNotUuids() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("not-a-uuid", null, of()));
+
+        assertThrows(InvalidCredentialsException.class, currentUserService::getCurrentUserId);
+    }
 }

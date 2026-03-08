@@ -1,5 +1,6 @@
 package com.chrisloarryn.users.integration;
 
+import org.springframework.http.MediaType;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,9 +11,17 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
+import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -27,6 +36,12 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    protected MockMvc mockMvc;
+
+    @Autowired
+    protected ObjectMapper objectMapper;
 
     static {
         if (DOCKER_AVAILABLE) {
@@ -52,5 +67,33 @@ abstract class AbstractIntegrationTest {
         jdbcTemplate.execute("DELETE FROM products");
         jdbcTemplate.execute("DELETE FROM phones");
         jdbcTemplate.execute("DELETE FROM users");
+    }
+
+    protected AuthContext registerAuthContext(String email, String password) throws Exception {
+        String response = mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name":"Api User",
+                                  "email":"%s",
+                                  "password":"%s",
+                                  "phones":[{"number":"123456789","cityCode":"1","countryCode":"56"}]
+                                }
+                                """.formatted(email, password)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.accessToken", notNullValue()))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        JsonNode root = objectMapper.readTree(response);
+        return new AuthContext(root.get("accessToken").asText(), root.get("user").get("id").asText());
+    }
+
+    protected String bearerToken(String token) {
+        return "Bearer " + token;
+    }
+
+    protected record AuthContext(String token, String userId) {
     }
 }

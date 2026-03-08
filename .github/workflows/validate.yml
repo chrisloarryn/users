@@ -22,6 +22,12 @@ jobs:
       errors: ${{ steps.publish-summary.outputs.errors }}
       skipped: ${{ steps.publish-summary.outputs.skipped }}
       duration_seconds: ${{ steps.publish-summary.outputs.duration_seconds }}
+      service_tests: ${{ steps.publish-summary.outputs.service_tests }}
+      security_tests: ${{ steps.publish-summary.outputs.security_tests }}
+      repository_tests: ${{ steps.publish-summary.outputs.repository_tests }}
+      integration_tests: ${{ steps.publish-summary.outputs.integration_tests }}
+      error_tests: ${{ steps.publish-summary.outputs.error_tests }}
+      other_tests: ${{ steps.publish-summary.outputs.other_tests }}
 
     steps:
       - name: Checkout repository
@@ -257,6 +263,12 @@ jobs:
           UNIT_FAILURES: ${{ needs.unit-tests.outputs.failures }}
           UNIT_ERRORS: ${{ needs.unit-tests.outputs.errors }}
           UNIT_SKIPPED: ${{ needs.unit-tests.outputs.skipped }}
+          UNIT_SERVICE_TESTS: ${{ needs.unit-tests.outputs.service_tests }}
+          UNIT_SECURITY_TESTS: ${{ needs.unit-tests.outputs.security_tests }}
+          UNIT_REPOSITORY_TESTS: ${{ needs.unit-tests.outputs.repository_tests }}
+          UNIT_INTEGRATION_TESTS: ${{ needs.unit-tests.outputs.integration_tests }}
+          UNIT_ERROR_TESTS: ${{ needs.unit-tests.outputs.error_tests }}
+          UNIT_OTHER_TESTS: ${{ needs.unit-tests.outputs.other_tests }}
           KARATE_RESULT: ${{ needs.karate-contract-tests.result }}
           KARATE_FEATURES: ${{ needs.karate-contract-tests.outputs.features_total }}
           KARATE_SCENARIOS: ${{ needs.karate-contract-tests.outputs.scenarios_total }}
@@ -290,7 +302,7 @@ jobs:
             echo ""
             echo "| Stage | Result | Highlights |"
             echo "| --- | --- | --- |"
-            echo "| Unit and integration | $(status_label "${UNIT_RESULT}") | tests=${UNIT_TESTS_RUN:-n/a}, failures=${UNIT_FAILURES:-n/a}, errors=${UNIT_ERRORS:-n/a}, skipped=${UNIT_SKIPPED:-n/a} |"
+            echo "| Unit and integration | $(status_label "${UNIT_RESULT}") | tests=${UNIT_TESTS_RUN:-n/a}, failures=${UNIT_FAILURES:-n/a}, errors=${UNIT_ERRORS:-n/a}, skipped=${UNIT_SKIPPED:-n/a}, svc=${UNIT_SERVICE_TESTS:-n/a}, sec=${UNIT_SECURITY_TESTS:-n/a}, repo=${UNIT_REPOSITORY_TESTS:-n/a}, api=${UNIT_INTEGRATION_TESTS:-n/a}, err=${UNIT_ERROR_TESTS:-n/a}, other=${UNIT_OTHER_TESTS:-n/a} |"
             echo "| Karate contracts | $(status_label "${KARATE_RESULT}") | features=${KARATE_FEATURES:-n/a}, scenarios=${KARATE_SCENARIOS:-n/a}, failed=${KARATE_FAILED:-n/a} |"
             echo "| Gatling performance | $(status_label "${GATLING_RESULT}") | requests=${GATLING_REQUESTS:-n/a}, ko=${GATLING_KO:-n/a}, p95=${GATLING_P95:-n/a}ms, p99=${GATLING_P99:-n/a}ms, throughput=${GATLING_THROUGHPUT:-n/a}rps, failed assertions=${GATLING_ASSERTIONS_FAILED:-n/a} |"
             echo "| Coverage quality gate | $(status_label "${COVERAGE_RESULT}") | line coverage=${COVERAGE_PCT:-n/a}%, threshold=${COVERAGE_THRESHOLD_PCT:-n/a}%, covered=${COVERAGE_COVERED_LINES:-n/a}, missed=${COVERAGE_MISSED_LINES:-n/a} |"

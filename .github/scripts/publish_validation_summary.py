@@ -28,6 +28,20 @@ def format_duration(seconds: float) -> str:
     return f"{seconds:.2f}s"
 
 
+def categorize_suite_name(suite_name: str) -> str:
+    if ".service." in suite_name:
+        return "service"
+    if ".security." in suite_name:
+        return "security"
+    if ".repository." in suite_name:
+        return "repository"
+    if ".integration." in suite_name:
+        return "integration"
+    if ".error." in suite_name:
+        return "error"
+    return "other"
+
+
 def parse_unit_reports(args: argparse.Namespace) -> int:
     reports_dir = Path(args.reports_dir)
     totals = {
@@ -38,6 +52,14 @@ def parse_unit_reports(args: argparse.Namespace) -> int:
         "duration_seconds": 0.0,
     }
     suites: list[tuple[str, int]] = []
+    categories = {
+        "service": {"suites": 0, "tests": 0},
+        "security": {"suites": 0, "tests": 0},
+        "repository": {"suites": 0, "tests": 0},
+        "integration": {"suites": 0, "tests": 0},
+        "error": {"suites": 0, "tests": 0},
+        "other": {"suites": 0, "tests": 0},
+    }
 
     for report in sorted(reports_dir.glob("TEST-*.xml")):
         root = ET.parse(report).getroot()
@@ -52,13 +74,24 @@ def parse_unit_reports(args: argparse.Namespace) -> int:
         totals["skipped"] += int(root.attrib.get("skipped", "0"))
         totals["duration_seconds"] += float(root.attrib.get("time", "0"))
         suites.append((suite_name, tests))
+        category = categorize_suite_name(suite_name)
+        categories[category]["suites"] += 1
+        categories[category]["tests"] += tests
 
     for key, value in totals.items():
         write_output(args.output_file, key, str(value))
+    for category, values in categories.items():
+        write_output(args.output_file, f"{category}_suite_count", str(values["suites"]))
+        write_output(args.output_file, f"{category}_tests", str(values["tests"]))
 
     suite_lines = "\n".join(
         f"| `{suite_name}` | {tests} |" for suite_name, tests in suites
     ) or "| No suites found | 0 |"
+    category_lines = "\n".join(
+        f"| {category.title()} | {values['suites']} | {values['tests']} |"
+        for category, values in categories.items()
+        if values["suites"] > 0
+    ) or "| Other | 0 | 0 |"
 
     append_summary(
         args.summary_file,
@@ -77,6 +110,10 @@ def parse_unit_reports(args: argparse.Namespace) -> int:
                 "| Suite | Tests |",
                 "| --- | ---: |",
                 suite_lines,
+                "",
+                "| Area | Suites | Tests |",
+                "| --- | ---: | ---: |",
+                category_lines,
                 "",
             ]
         ),
