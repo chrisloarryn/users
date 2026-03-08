@@ -39,6 +39,7 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
+          mkdir -p target
           set -o pipefail
           ./mvnw --batch-mode -DexcludedGroups=karate test 2>&1 | tee target/unit-tests.log
           exit_code=${PIPESTATUS[0]}
@@ -95,6 +96,7 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
+          mkdir -p target
           set -o pipefail
           ./mvnw --batch-mode -Dtest=karate.ApiContractsKarateTest test 2>&1 | tee target/karate-console.log
           exit_code=${PIPESTATUS[0]}
@@ -154,6 +156,7 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
+          mkdir -p target
           set -o pipefail
           ./mvnw --batch-mode -Pgatling verify -DskipTests=true 2>&1 | tee target/gatling-console.log
           exit_code=${PIPESTATUS[0]}
