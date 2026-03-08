@@ -60,6 +60,31 @@ Swagger queda disponible en local en `http://localhost:8080/swagger-ui/index.htm
 
 El perfil `gatling` levanta la aplicacion con `test,gatling`, ejecuta la simulacion sobre `http://127.0.0.1:8080` y deja el reporte en `target/gatling`.
 
+La simulacion actual cubre:
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/users`
+- `GET /api/users/{id}`
+- `PUT /api/users/{id}`
+- `DELETE /api/users/{id}`
+- `POST /api/products`
+- `GET /api/products`
+- `GET /api/products/{id}`
+- `PUT /api/products/{id}`
+- `DELETE /api/products/{id}`
+- `GET /api/users/{userId}/products`
+- `GET /api/users/{userId}/products/{productId}`
+
+Resultado de referencia de la ultima validacion local ejecutada el 8 de marzo de 2026 con `./mvnw --batch-mode -Pgatling clean verify -DskipTests=true`:
+
+- `715` requests totales
+- `0` requests fallidos
+- `42.06` requests por segundo promedio
+- `1488 ms` en el percentil 99
+
+Ese resultado genero el reporte en `target/gatling/usersapisimulation-20260308071932736`.
+
 Puedes ajustar la carga con propiedades Maven, por ejemplo:
 
 ```bash
