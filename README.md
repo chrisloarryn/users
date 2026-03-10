@@ -249,16 +249,16 @@ The GitHub Actions workflow lives in `.github/workflows/validate.yml`.
 ### Latest CI Validation Snapshot
 _Automatically updated by `Validate Java Application` after push runs on `main` and `develop`._
 
-- Run: [`#157`](https://github.com/chrisloarryn/users/actions/runs/22904873867)
+- Run: [`#158`](https://github.com/chrisloarryn/users/actions/runs/22905621273)
 - Branch: `develop`
-- Commit: [`bb0470e`](https://github.com/chrisloarryn/users/commit/bb0470e5167b073de902499a612d5a27a52b3b79)
-- Updated: March 10, 2026 13:32 UTC
+- Commit: [`8f52d68`](https://github.com/chrisloarryn/users/commit/8f52d68d9b7b68d52486b197d05b8af96d9f1161)
+- Updated: March 10, 2026 13:49 UTC
 
 | Stage | Result | Highlights |
 | --- | --- | --- |
-| Unit and integration | PASS | tests=59, failures=0, errors=0, skipped=0, duration=27.01s, svc=23, sec=8, repo=5, api=20, err=3, other=0 |
-| Karate contracts | PASS | features=18, scenarios=101, failed=0, duration=14.69s |
-| Gatling performance | PASS | requests=715, ok=715, ko=0, mean=24ms, p95=87ms, p99=101ms, throughput=42.06rps, failed assertions=0 |
+| Unit and integration | PASS | tests=59, failures=0, errors=0, skipped=0, duration=26.32s, svc=23, sec=8, repo=5, api=20, err=3, other=0 |
+| Karate contracts | PASS | features=18, scenarios=101, failed=0, duration=15.35s |
+| Gatling performance | PASS | requests=715, ok=715, ko=0, mean=24ms, p95=88ms, p99=97ms, throughput=42.06rps, failed assertions=0 |
 | Coverage quality gate | PASS | line coverage=98.19%, threshold=90.00%, covered=217, missed=4 |
 
 Artifacts published by the run:
