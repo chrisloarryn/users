@@ -25,7 +25,7 @@
         <gatling.spring-boot.jmx-port>19001</gatling.spring-boot.jmx-port>
         <jacoco.version>0.8.13</jacoco.version>
         <coverage.minimum.line.ratio>0.90</coverage.minimum.line.ratio>
-        <springdoc.version>3.0.0</springdoc.version>
+        <springdoc.version>3.0.2</springdoc.version>
         <testcontainers.version>1.21.4</testcontainers.version>
     </properties>
 
