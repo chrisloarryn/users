@@ -64,11 +64,15 @@ To run the same first stage used by the CI workflow:
 
 This runs Spring Boot unit and integration tests while excluding Karate so API contract coverage stays isolated from the rest of the suite.
 
-Current local result validated on March 8, 2026:
-
-- `59` tests executed
-- `0` failures
-- `0` errors
+<!-- validation-unit:start -->
+Latest completed CI result from [`Validate Java Application #158`](https://github.com/chrisloarryn/users/actions/runs/22905621273) on `develop`:
+- result: `PASS`
+- tests executed: `59`
+- failures: `0`
+- errors: `0`
+- skipped: `0`
+- duration: `26.32s`
+<!-- validation-unit:end -->
 
 When Docker is available, integration tests use PostgreSQL through Testcontainers. When Docker is not available, the `test` profile falls back to H2 for local validation.
 
@@ -102,11 +106,14 @@ Example tag filtering:
 ./mvnw --batch-mode -Dtest=karate.ApiContractsKarateTest -Dkarate.tags=@products test
 ```
 
-Current local result validated on March 8, 2026:
-
-- `18` features
-- `101` scenarios
-- `0` failed scenarios
+<!-- validation-karate:start -->
+Latest completed CI result from [`Validate Java Application #158`](https://github.com/chrisloarryn/users/actions/runs/22905621273) on `develop`:
+- result: `PASS`
+- features: `18`
+- scenarios: `101`
+- failed scenarios: `0`
+- duration: `15.35s`
+<!-- validation-karate:end -->
 
 The HTML report is generated at `target/karate-reports/karate-summary.html`.
 
@@ -138,11 +145,15 @@ To run the full local functional validation:
 ./mvnw --batch-mode test
 ```
 
-Local result validated on March 8, 2026:
+The workflow runs the functional suites in separate jobs, so the combined reference below is synthesized automatically from the latest unit and Karate results.
 
-- `160` total tests
-- `0` failures
-- `0` errors
+<!-- validation-full:start -->
+Latest completed CI result from [`Validate Java Application #158`](https://github.com/chrisloarryn/users/actions/runs/22905621273) on `develop`:
+- combined result: `PASS`
+- total checks derived from unit + Karate: `160`
+- failures: `0`
+- errors: `0`
+<!-- validation-full:end -->
 
 ### Coverage quality gate
 
@@ -152,12 +163,14 @@ To run the same coverage gate used in CI:
 ./mvnw --batch-mode -Pcoverage verify -DexcludedGroups=karate
 ```
 
-Current local result validated on March 8, 2026:
-
-- `98.19%` line coverage
-- `217` covered lines
-- `4` missed lines
-- `90%` minimum threshold
+<!-- validation-coverage:start -->
+Latest completed CI result from [`Validate Java Application #158`](https://github.com/chrisloarryn/users/actions/runs/22905621273) on `develop`:
+- result: `PASS`
+- line coverage: `98.19%`
+- covered lines: `217`
+- missed lines: `4`
+- minimum threshold: `90.00%`
+<!-- validation-coverage:end -->
 
 ### Performance tests with Gatling
 
@@ -183,23 +196,20 @@ The current simulation covers:
 - `GET /api/users/{userId}/products`
 - `GET /api/users/{userId}/products/{productId}`
 
-Reference local workstation result captured on March 8, 2026 with `./mvnw --batch-mode -Pgatling verify -DskipTests=true`:
+<!-- validation-gatling:start -->
+Latest completed CI result from [`Validate Java Application #158`](https://github.com/chrisloarryn/users/actions/runs/22905621273) on `develop`:
+- result: `PASS`
+- total requests: `715`
+- successful requests: `715`
+- failed requests: `0`
+- mean response time: `24 ms`
+- p95: `88 ms`
+- p99: `97 ms`
+- throughput: `42.06 rps`
+- failed assertions: `0`
+<!-- validation-gatling:end -->
 
-- `715` total requests
-- `0` failed requests
-- `42.06` average requests per second
-- `1571 ms` at the 99th percentile
-- final status: `failed` because of a performance assertion
-
-Local failure detail for that workstation run:
-
-- the global Gatling assertion requires p99 `< 1500 ms`
-- the last run reported `1571 ms`
-- even with `0` failed requests, Maven ends with `BUILD FAILURE` until that threshold is met
-
-The latest CI outcome for this stage is published in the auto-generated snapshot in the `CI workflow` section below.
-
-That run generated the report in `target/gatling/usersapisimulation-20260308075542448`.
+Each workflow run uploads the detailed HTML report in the `gatling-report` artifact. Local executions still write their report under `target/gatling`.
 
 #### When Gatling is useful
 
