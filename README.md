@@ -183,7 +183,7 @@ The current simulation covers:
 - `GET /api/users/{userId}/products`
 - `GET /api/users/{userId}/products/{productId}`
 
-Reference local result from the last validation executed on March 8, 2026 with `./mvnw --batch-mode -Pgatling verify -DskipTests=true`:
+Reference local workstation result captured on March 8, 2026 with `./mvnw --batch-mode -Pgatling verify -DskipTests=true`:
 
 - `715` total requests
 - `0` failed requests
@@ -191,11 +191,13 @@ Reference local result from the last validation executed on March 8, 2026 with `
 - `1571 ms` at the 99th percentile
 - final status: `failed` because of a performance assertion
 
-Current failure detail:
+Local failure detail for that workstation run:
 
 - the global Gatling assertion requires p99 `< 1500 ms`
 - the last run reported `1571 ms`
 - even with `0` failed requests, Maven ends with `BUILD FAILURE` until that threshold is met
+
+The latest CI outcome for this stage is published in the auto-generated snapshot in the `CI workflow` section below.
 
 That run generated the report in `target/gatling/usersapisimulation-20260308075542448`.
 
@@ -243,7 +245,36 @@ If `spring-boot:start` conflicts with another local process, you can move the JM
 
 The GitHub Actions workflow lives in `.github/workflows/validate.yml`.
 
-Execution order:
+<!-- validation-snapshot:start -->
+### Latest CI Validation Snapshot
+_Automatically updated by `Validate Java Application` after push runs on `main` and `develop`._
+
+- Run: [`#157`](https://github.com/chrisloarryn/users/actions/runs/22904873867)
+- Branch: `develop`
+- Commit: [`bb0470e`](https://github.com/chrisloarryn/users/commit/bb0470e5167b073de902499a612d5a27a52b3b79)
+- Updated: March 10, 2026 13:32 UTC
+
+| Stage | Result | Highlights |
+| --- | --- | --- |
+| Unit and integration | PASS | tests=59, failures=0, errors=0, skipped=0, duration=27.01s, svc=23, sec=8, repo=5, api=20, err=3, other=0 |
+| Karate contracts | PASS | features=18, scenarios=101, failed=0, duration=14.69s |
+| Gatling performance | PASS | requests=715, ok=715, ko=0, mean=24ms, p95=87ms, p99=101ms, throughput=42.06rps, failed assertions=0 |
+| Coverage quality gate | PASS | line coverage=98.19%, threshold=90.00%, covered=217, missed=4 |
+
+Artifacts published by the run:
+- `unit-test-report`
+- `karate-report`
+- `gatling-report`
+- `coverage-report`
+<!-- validation-snapshot:end -->
+
+GitHub Actions is the source of truth for pipeline status. The local figures documented above are reference baselines, and runner-dependent stages such as Gatling can vary between a workstation and `ubuntu-latest`.
+
+Validation runs are concurrency-controlled per branch or pull request. When a newer push arrives for the same ref, GitHub Actions cancels any older in-progress validation run so only the newest one continues.
+
+`README.md`-only commits are excluded from the validation and deployment push triggers so the automatic refresh does not create an infinite CI loop.
+
+Execution order inside a single active run:
 
 1. `unit-tests`
 2. In parallel after `unit-tests` succeeds:

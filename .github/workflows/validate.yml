@@ -5,13 +5,21 @@ on:
     branches:
       - main
       - develop
+    paths-ignore:
+      - README.md
   pull_request:
     branches:
       - main
       - develop
+    paths-ignore:
+      - README.md
 
 permissions:
   contents: read
+
+concurrency:
+  group: validate-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   unit-tests:
@@ -313,3 +321,109 @@ jobs:
             echo "- \`gatling-report\`"
             echo "- \`coverage-report\`"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  update-readme-validation-snapshot:
+    runs-on: ubuntu-latest
+    if: always() && github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    needs:
+      - unit-tests
+      - karate-contract-tests
+      - gatling-performance-tests
+      - coverage-quality-gate
+      - validation-summary
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Update README validation snapshot
+        env:
+          UNIT_RESULT: ${{ needs.unit-tests.result }}
+          UNIT_TESTS_RUN: ${{ needs.unit-tests.outputs.tests_run }}
+          UNIT_FAILURES: ${{ needs.unit-tests.outputs.failures }}
+          UNIT_ERRORS: ${{ needs.unit-tests.outputs.errors }}
+          UNIT_SKIPPED: ${{ needs.unit-tests.outputs.skipped }}
+          UNIT_DURATION_SECONDS: ${{ needs.unit-tests.outputs.duration_seconds }}
+          UNIT_SERVICE_TESTS: ${{ needs.unit-tests.outputs.service_tests }}
+          UNIT_SECURITY_TESTS: ${{ needs.unit-tests.outputs.security_tests }}
+          UNIT_REPOSITORY_TESTS: ${{ needs.unit-tests.outputs.repository_tests }}
+          UNIT_INTEGRATION_TESTS: ${{ needs.unit-tests.outputs.integration_tests }}
+          UNIT_ERROR_TESTS: ${{ needs.unit-tests.outputs.error_tests }}
+          UNIT_OTHER_TESTS: ${{ needs.unit-tests.outputs.other_tests }}
+          KARATE_RESULT: ${{ needs.karate-contract-tests.result }}
+          KARATE_FEATURES: ${{ needs.karate-contract-tests.outputs.features_total }}
+          KARATE_SCENARIOS: ${{ needs.karate-contract-tests.outputs.scenarios_total }}
+          KARATE_FAILED: ${{ needs.karate-contract-tests.outputs.scenarios_failed }}
+          KARATE_DURATION_SECONDS: ${{ needs.karate-contract-tests.outputs.elapsed_seconds }}
+          GATLING_RESULT: ${{ needs.gatling-performance-tests.result }}
+          GATLING_REQUESTS: ${{ needs.gatling-performance-tests.outputs.requests_total }}
+          GATLING_OK: ${{ needs.gatling-performance-tests.outputs.requests_ok }}
+          GATLING_KO: ${{ needs.gatling-performance-tests.outputs.requests_ko }}
+          GATLING_MEAN_MS: ${{ needs.gatling-performance-tests.outputs.mean_response_ms }}
+          GATLING_P95: ${{ needs.gatling-performance-tests.outputs.p95_ms }}
+          GATLING_P99: ${{ needs.gatling-performance-tests.outputs.p99_ms }}
+          GATLING_THROUGHPUT: ${{ needs.gatling-performance-tests.outputs.throughput_rps }}
+          GATLING_ASSERTIONS_FAILED: ${{ needs.gatling-performance-tests.outputs.assertions_failed }}
+          COVERAGE_RESULT: ${{ needs.coverage-quality-gate.result }}
+          COVERAGE_PCT: ${{ needs.coverage-quality-gate.outputs.line_coverage_pct }}
+          COVERAGE_THRESHOLD_PCT: ${{ needs.coverage-quality-gate.outputs.coverage_threshold_pct }}
+          COVERAGE_COVERED_LINES: ${{ needs.coverage-quality-gate.outputs.covered_lines }}
+          COVERAGE_MISSED_LINES: ${{ needs.coverage-quality-gate.outputs.missed_lines }}
+        run: |
+          python3 .github/scripts/update_validation_readme.py \
+            --readme README.md \
+            --repository "$GITHUB_REPOSITORY" \
+            --run-id "$GITHUB_RUN_ID" \
+            --run-number "$GITHUB_RUN_NUMBER" \
+            --branch "$GITHUB_REF_NAME" \
+            --commit-sha "$GITHUB_SHA" \
+            --updated-at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --unit-result "${UNIT_RESULT}" \
+            --unit-tests-run "${UNIT_TESTS_RUN}" \
+            --unit-failures "${UNIT_FAILURES}" \
+            --unit-errors "${UNIT_ERRORS}" \
+            --unit-skipped "${UNIT_SKIPPED}" \
+            --unit-duration-seconds "${UNIT_DURATION_SECONDS}" \
+            --unit-service-tests "${UNIT_SERVICE_TESTS}" \
+            --unit-security-tests "${UNIT_SECURITY_TESTS}" \
+            --unit-repository-tests "${UNIT_REPOSITORY_TESTS}" \
+            --unit-integration-tests "${UNIT_INTEGRATION_TESTS}" \
+            --unit-error-tests "${UNIT_ERROR_TESTS}" \
+            --unit-other-tests "${UNIT_OTHER_TESTS}" \
+            --karate-result "${KARATE_RESULT}" \
+            --karate-features "${KARATE_FEATURES}" \
+            --karate-scenarios "${KARATE_SCENARIOS}" \
+            --karate-failed "${KARATE_FAILED}" \
+            --karate-duration-seconds "${KARATE_DURATION_SECONDS}" \
+            --gatling-result "${GATLING_RESULT}" \
+            --gatling-requests "${GATLING_REQUESTS}" \
+            --gatling-ok "${GATLING_OK}" \
+            --gatling-ko "${GATLING_KO}" \
+            --gatling-mean-ms "${GATLING_MEAN_MS}" \
+            --gatling-p95 "${GATLING_P95}" \
+            --gatling-p99 "${GATLING_P99}" \
+            --gatling-throughput "${GATLING_THROUGHPUT}" \
+            --gatling-assertions-failed "${GATLING_ASSERTIONS_FAILED}" \
+            --coverage-result "${COVERAGE_RESULT}" \
+            --coverage-pct "${COVERAGE_PCT}" \
+            --coverage-threshold-pct "${COVERAGE_THRESHOLD_PCT}" \
+            --coverage-covered-lines "${COVERAGE_COVERED_LINES}" \
+            --coverage-missed-lines "${COVERAGE_MISSED_LINES}"
+
+      - name: Commit README validation snapshot
+        run: |
+          if git diff --quiet -- README.md; then
+            echo "README snapshot is already up to date."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "docs(readme): refresh validation snapshot [skip ci]"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
