@@ -180,6 +180,8 @@ Latest completed CI result from [`Validate Java Application #159`](https://githu
 
 The `gatling` profile starts the application with `test,gatling`, runs the simulation against `http://127.0.0.1:8080`, and writes the report to `target/gatling`.
 
+The simulation is organized into readable chains for authentication, user lifecycle, product lifecycle, and cleanup so new requests can be added without growing a single monolithic flow.
+
 The current simulation covers:
 
 - `POST /api/auth/register`
