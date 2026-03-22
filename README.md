@@ -65,13 +65,13 @@ To run the same first stage used by the CI workflow:
 This runs Spring Boot unit and integration tests while excluding Karate so API contract coverage stays isolated from the rest of the suite.
 
 <!-- validation-unit:start -->
-Latest completed CI result from [`Validate Java Application #167`](https://github.com/chrisloarryn/users/actions/runs/23392747613) on `develop`:
-- result: `CANCELLED`
-- tests executed: `0`
+Latest completed CI result from [`Validate Java Application #169`](https://github.com/chrisloarryn/users/actions/runs/23392755617) on `develop`:
+- result: `PASS`
+- tests executed: `59`
 - failures: `0`
 - errors: `0`
 - skipped: `0`
-- duration: `0.00s`
+- duration: `25.10s`
 <!-- validation-unit:end -->
 
 When Docker is available, integration tests use PostgreSQL through Testcontainers. When Docker is not available, the `test` profile falls back to H2 for local validation.
@@ -107,12 +107,12 @@ Example tag filtering:
 ```
 
 <!-- validation-karate:start -->
-Latest completed CI result from [`Validate Java Application #167`](https://github.com/chrisloarryn/users/actions/runs/23392747613) on `develop`:
-- result: `CANCELLED`
-- features: `n/a`
-- scenarios: `n/a`
-- failed scenarios: `n/a`
-- duration: `n/a`
+Latest completed CI result from [`Validate Java Application #169`](https://github.com/chrisloarryn/users/actions/runs/23392755617) on `develop`:
+- result: `PASS`
+- features: `18`
+- scenarios: `101`
+- failed scenarios: `0`
+- duration: `14.38s`
 <!-- validation-karate:end -->
 
 The HTML report is generated at `target/karate-reports/karate-summary.html`.
@@ -148,10 +148,10 @@ To run the full local functional validation:
 The workflow runs the functional suites in separate jobs, so the combined reference below is synthesized automatically from the latest unit and Karate results.
 
 <!-- validation-full:start -->
-Latest completed CI result from [`Validate Java Application #167`](https://github.com/chrisloarryn/users/actions/runs/23392747613) on `develop`:
-- combined result: `CHECK DETAILS`
-- total checks derived from unit + Karate: `n/a`
-- failures: `n/a`
+Latest completed CI result from [`Validate Java Application #169`](https://github.com/chrisloarryn/users/actions/runs/23392755617) on `develop`:
+- combined result: `PASS`
+- total checks derived from unit + Karate: `160`
+- failures: `0`
 - errors: `0`
 <!-- validation-full:end -->
 
@@ -164,12 +164,12 @@ To run the same coverage gate used in CI:
 ```
 
 <!-- validation-coverage:start -->
-Latest completed CI result from [`Validate Java Application #167`](https://github.com/chrisloarryn/users/actions/runs/23392747613) on `develop`:
-- result: `CANCELLED`
-- line coverage: `n/a%`
-- covered lines: `n/a`
-- missed lines: `n/a`
-- minimum threshold: `n/a%`
+Latest completed CI result from [`Validate Java Application #169`](https://github.com/chrisloarryn/users/actions/runs/23392755617) on `develop`:
+- result: `PASS`
+- line coverage: `98.19%`
+- covered lines: `217`
+- missed lines: `4`
+- minimum threshold: `90.00%`
 <!-- validation-coverage:end -->
 
 ### Performance tests with Gatling
@@ -199,16 +199,16 @@ The current simulation covers:
 - `GET /api/users/{userId}/products/{productId}`
 
 <!-- validation-gatling:start -->
-Latest completed CI result from [`Validate Java Application #167`](https://github.com/chrisloarryn/users/actions/runs/23392747613) on `develop`:
-- result: `CANCELLED`
-- total requests: `n/a`
-- successful requests: `n/a`
-- failed requests: `n/a`
-- mean response time: `n/a ms`
-- p95: `n/a ms`
-- p99: `n/a ms`
-- throughput: `n/a rps`
-- failed assertions: `n/a`
+Latest completed CI result from [`Validate Java Application #169`](https://github.com/chrisloarryn/users/actions/runs/23392755617) on `develop`:
+- result: `PASS`
+- total requests: `880`
+- successful requests: `880`
+- failed requests: `0`
+- mean response time: `21 ms`
+- p95: `88 ms`
+- p99: `96 ms`
+- throughput: `51.76 rps`
+- failed assertions: `0`
 <!-- validation-gatling:end -->
 
 Each workflow run uploads the detailed HTML report in the `gatling-report` artifact. Local executions still write their report under `target/gatling`.
@@ -261,17 +261,17 @@ The GitHub Actions workflow lives in `.github/workflows/validate.yml`.
 ### Latest CI Validation Snapshot
 _Automatically updated by `Validate Java Application` after push runs on `main` and `develop`._
 
-- Run: [`#167`](https://github.com/chrisloarryn/users/actions/runs/23392747613)
+- Run: [`#169`](https://github.com/chrisloarryn/users/actions/runs/23392755617)
 - Branch: `develop`
-- Commit: [`84fa014`](https://github.com/chrisloarryn/users/commit/84fa014f174949ce20a5d77e105986ebef91ed61)
-- Updated: March 22, 2026 01:10 UTC
+- Commit: [`9352efa`](https://github.com/chrisloarryn/users/commit/9352efa9b47fd6d02cd818c3a61ee1982db0e56b)
+- Updated: March 22, 2026 01:13 UTC
 
 | Stage | Result | Highlights |
 | --- | --- | --- |
-| Unit and integration | CANCELLED | tests=0, failures=0, errors=0, skipped=0, duration=0.00s, svc=0, sec=0, repo=0, api=0, err=0, other=0 |
-| Karate contracts | CANCELLED | features=n/a, scenarios=n/a, failed=n/a, duration=n/a |
-| Gatling performance | CANCELLED | requests=n/a, ok=n/a, ko=n/a, mean=n/ams, p95=n/ams, p99=n/ams, throughput=n/arps, failed assertions=n/a |
-| Coverage quality gate | CANCELLED | line coverage=n/a%, threshold=n/a%, covered=n/a, missed=n/a |
+| Unit and integration | PASS | tests=59, failures=0, errors=0, skipped=0, duration=25.10s, svc=23, sec=8, repo=5, api=20, err=3, other=0 |
+| Karate contracts | PASS | features=18, scenarios=101, failed=0, duration=14.38s |
+| Gatling performance | PASS | requests=880, ok=880, ko=0, mean=21ms, p95=88ms, p99=96ms, throughput=51.76rps, failed assertions=0 |
+| Coverage quality gate | PASS | line coverage=98.19%, threshold=90.00%, covered=217, missed=4 |
 
 Artifacts published by the run:
 - `unit-test-report`
