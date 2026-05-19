@@ -1,4 +1,4 @@
-FROM maven:3.9.13-eclipse-temurin-25 AS build
+FROM maven:3.9.15-eclipse-temurin-26 AS build
 WORKDIR /workspace
 
 COPY .mvn/ .mvn
