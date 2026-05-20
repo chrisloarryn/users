@@ -20,7 +20,7 @@
     <properties>
         <java.version>25</java.version>
         <karate.version>1.5.2</karate.version>
-        <gatling.plugin.version>4.21.5</gatling.plugin.version>
+        <gatling.plugin.version>4.21.6</gatling.plugin.version>
         <gatling.version>3.15.0</gatling.version>
         <gatling.spring-boot.jmx-port>19001</gatling.spring-boot.jmx-port>
         <jacoco.version>0.8.14</jacoco.version>
